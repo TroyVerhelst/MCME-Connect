@@ -25,7 +25,7 @@ public class MvtpHandler {
     public static boolean handle(String sender, String server) {
         Callback<Boolean> callback = (connected, error) -> {
             if(connected) {
-                //ProxyServer.getInstance().getScheduler().schedule(ConnectBungeePlugin.getInstance(), () -> {
+                ProxyServer.getInstance().getScheduler().schedule(ConnectBungeePlugin.getInstance(), () -> {
                     ServerInfo dest = ProxyServer.getInstance().getServerInfo(server);
                     ProxiedPlayer player = ProxyServer.getInstance().getPlayer(sender);
 //Logger.getGlobal().info("mvtp player "+player.getName()+" to "+dest.getName()+" at "+player.getServer().getInfo().getName());
@@ -34,7 +34,7 @@ public class MvtpHandler {
                     out.writeUTF(sender);
 //Logger.getGlobal().info("mctp to "+server+" done!");
                     ProxyServer.getInstance().getServerInfo(server).sendData(Channel.MAIN, out.toByteArray(),true);   
-                //}, ConnectBungeePlugin.getConnectDelay(), TimeUnit.MILLISECONDS);
+                }, ConnectBungeePlugin.getConnectDelay(), TimeUnit.MILLISECONDS);
             }
         };
         return (ConnectHandler.handle(sender, server, callback)); //if {
