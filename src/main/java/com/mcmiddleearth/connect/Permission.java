@@ -13,4 +13,5 @@ public class Permission {
     
     public static final String TP      = "mcmeconnect.tp";
     public static final String WORLD   = "mcmeconnect.world";
+    public static final String WATCHDOG   = "mcmeconnect.watchdog";
 }

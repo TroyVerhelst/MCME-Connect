@@ -1,0 +1,7 @@
+legacyRedirect:
+    enabled: true
+    from: newplayer
+    to: build
+disableMVTP:
+- newPlayer
+connectDelay: 200

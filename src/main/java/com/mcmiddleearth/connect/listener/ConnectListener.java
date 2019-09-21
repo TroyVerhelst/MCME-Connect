@@ -8,6 +8,8 @@ package com.mcmiddleearth.connect.listener;
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteStreams;
 import com.mcmiddleearth.connect.Channel;
+import com.mcmiddleearth.connect.ConnectPlugin;
+import com.mcmiddleearth.connect.bungee.ConnectBungeePlugin;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.logging.Logger;
@@ -17,6 +19,7 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.messaging.PluginMessageListener;
+import org.bukkit.scheduler.BukkitRunnable;
 
 /**
  *
@@ -88,7 +91,16 @@ Logger.getGlobal().info("Title!");
 Logger.getGlobal().info("Spawn!");
             String name = in.readUTF();
             Player p = Bukkit.getPlayer(name);
-            p.teleport(p.getWorld().getSpawnLocation().add(0.5,0,0.5));
+Logger.getGlobal().info("Player: "+p);
+Logger.getGlobal().info("World: "+p.getWorld());
+            int delay = (p==null?ConnectBungeePlugin.getConnectDelay():1);
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    Player p = Bukkit.getPlayer(name);
+                    p.teleport(p.getWorld().getSpawnLocation().add(0.5,0,0.5));
+                }
+            }.runTaskLater(ConnectPlugin.getInstance(), delay);
         }
     }
 

@@ -6,6 +6,7 @@
 package com.mcmiddleearth.connect.bungee.listener;
 
 import com.mcmiddleearth.connect.Permission;
+import com.mcmiddleearth.connect.bungee.ConnectBungeePlugin;
 import com.mcmiddleearth.connect.bungee.Handler.TpHandler;
 import com.mcmiddleearth.connect.bungee.Handler.MvtpHandler;
 import java.util.Collection;
@@ -29,10 +30,14 @@ public class CommandListener implements Listener {
     @EventHandler
     public void onChat(ChatEvent event) {
 //Logger.getGlobal().info("Has perms: "+((ProxiedPlayer)event.getSender()).hasPermission(Permission.TP)
-//        +" "+((ProxiedPlayer)event.getSender()).hasPermission(Permission.WORLD));
+// +" "+((ProxiedPlayer)event.getSender()).hasPermission(Permission.WORLD));
         if(event.isCommand()) {
+//Logger.getGlobal().info("Is command!");
             String[] message = event.getMessage().split(" ");
+//if(message.length>1) 
+//Logger.getGlobal().info("server "+message[0]+" "+message[1]+" "+ProxyServer.getInstance().getServerInfo(message[1]));
             if(message[0].equalsIgnoreCase("/tp") && message.length>1) {
+//Logger.getGlobal().info("/tp!");
                 if(event.getSender() instanceof ProxiedPlayer
                         && ((ProxiedPlayer)event.getSender()).hasPermission(Permission.TP)) {
                     ProxiedPlayer destination = ProxyServer.getInstance().getPlayer(message[1]);
@@ -47,8 +52,12 @@ public class CommandListener implements Listener {
                        || message[0].equalsIgnoreCase("/world"))
                     && message.length>1
                     && ProxyServer.getInstance().getServerInfo(message[1])!=null) {
+//Logger.getGlobal().info("/mvtp");
                 if(event.getSender() instanceof ProxiedPlayer
-                        && ((ProxiedPlayer)event.getSender()).hasPermission(Permission.WORLD)) {
+                        && !((ProxiedPlayer)event.getSender()).getServer().getInfo().getName()
+                                .equals(ConnectBungeePlugin.getLegacyRedirectFrom())
+                        && ((ProxiedPlayer)event.getSender()).hasPermission(Permission.WORLD+"."+message[1])) {
+//Logger.getGlobal().info("handle");
                     if(MvtpHandler.handle(((ProxiedPlayer) event.getSender()).getName(),message[1])) {
                         event.setCancelled(true);
                     }

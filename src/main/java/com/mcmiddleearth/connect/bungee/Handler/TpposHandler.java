@@ -8,6 +8,8 @@ package com.mcmiddleearth.connect.bungee.Handler;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import com.mcmiddleearth.connect.Channel;
+import com.mcmiddleearth.connect.bungee.ConnectBungeePlugin;
+import java.util.concurrent.TimeUnit;
 import net.md_5.bungee.api.Callback;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -24,12 +26,14 @@ public class TpposHandler {
             Callback<Boolean> callback = (connected, error) -> {
                 if(connected) {
                     //ServerInfo serverInfo = ProxyServer.getInstance().getServerInfo(server);
-                    ByteArrayDataOutput out = ByteStreams.newDataOutput();
-                    out.writeUTF(Channel.TPPOS);
-                    out.writeUTF(sender);
-                    out.writeUTF(world);
-                    out.writeUTF(location);
-                    ProxyServer.getInstance().getServerInfo(server).sendData(Channel.MAIN, out.toByteArray());
+                    ProxyServer.getInstance().getScheduler().schedule(ConnectBungeePlugin.getInstance(), () -> {
+                        ByteArrayDataOutput out = ByteStreams.newDataOutput();
+                        out.writeUTF(Channel.TPPOS);
+                        out.writeUTF(sender);
+                        out.writeUTF(world);
+                        out.writeUTF(location);
+                        ProxyServer.getInstance().getServerInfo(server).sendData(Channel.MAIN, out.toByteArray());
+                    }, ConnectBungeePlugin.getConnectDelay(), TimeUnit.MILLISECONDS);
                     //Logger.getGlobal().info("sending teleport message!");
                 }
             };
