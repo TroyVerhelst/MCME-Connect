@@ -5,7 +5,8 @@
  */
 package com.mcmiddleearth.connect;
 
-import com.mcmiddleearth.connect.listener.ConnectListener;
+import com.mcmiddleearth.connect.listener.PlayerListener;
+import com.mcmiddleearth.connect.listener.PluginListener;
 import java.util.logging.Logger;
 import lombok.Getter;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -25,8 +26,9 @@ public class ConnectPlugin extends JavaPlugin {
         instance = this;
         Bukkit.getServer().getMessenger()
                 .registerOutgoingPluginChannel(this, Channel.MAIN);
+        Bukkit.getPluginManager().registerEvents(new PlayerListener(), this);
         Logger.getGlobal().info("Registation incoming channel: "+Bukkit.getServer().getMessenger()
-                .registerIncomingPluginChannel(this, Channel.MAIN, new ConnectListener()).isValid());
+                .registerIncomingPluginChannel(this, Channel.MAIN, new PluginListener()).isValid());
     }
 
 }

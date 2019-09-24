@@ -10,6 +10,7 @@ package com.mcmiddleearth.connect.bungee;
  * @author Eriol_Eandur
  */
 import com.mcmiddleearth.connect.Channel;
+import com.mcmiddleearth.connect.bungee.Handler.VanishHandler;
 import com.mcmiddleearth.connect.bungee.listener.PluginMessageListener;
 import com.mcmiddleearth.connect.bungee.listener.ConnectionListener;
 import com.mcmiddleearth.connect.bungee.listener.CommandListener;
@@ -66,11 +67,14 @@ public class ConnectBungeePlugin extends Plugin {
         saveDefaultConfig();
         loadConfig();
         loadLegacyPlayers();
+        VanishHandler.setPvSupport(config.getBoolean("premiumVanish", false));
+        VanishHandler.loadVanished();
         //loadLegacyRedirect();
         ProxyServer.getInstance().registerChannel(Channel.MAIN);
         getProxy().getPluginManager().registerListener(this, new PluginMessageListener());
         getProxy().getPluginManager().registerListener(this, new CommandListener());
-        getProxy().getPluginManager().registerListener(this, new ConnectionListener());
+        getProxy().getPluginManager().registerListener(this, 
+                         new ConnectionListener());
     }
     
     @Override
