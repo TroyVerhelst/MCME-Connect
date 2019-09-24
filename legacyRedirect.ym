@@ -1,0 +1,4 @@
+legacyRedirect: 
+  enabled: true
+  from: newplayer
+  to: build

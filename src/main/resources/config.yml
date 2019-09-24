@@ -5,3 +5,5 @@ legacyRedirect:
 disableMVTP:
 - newPlayer
 connectDelay: 200
+premiumVanish: false
+themedbuildWorld: themedbuilds

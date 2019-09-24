@@ -30,7 +30,7 @@ public class ServerWatchdog {
                                    .filter(player -> player.hasPermission(Permission.WATCHDOG))
                                    .forEach(player -> player.sendMessage(
                                            new ComponentBuilder("WARNING! Server '"+ChatColor.DARK_RED
-                                                                        +name+ChatColor.RESET+"' seems to be down.")
+                                                                        +name+ChatColor.RED+"' seems to be down.")
                                                                .color(ChatColor.RED).create()));
                     }
                  });

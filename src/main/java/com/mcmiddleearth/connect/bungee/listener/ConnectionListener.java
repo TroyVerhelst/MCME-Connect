@@ -6,8 +6,14 @@
 package com.mcmiddleearth.connect.bungee.listener;
 
 import com.mcmiddleearth.connect.bungee.ConnectBungeePlugin;
-import java.util.logging.Logger;
+import com.mcmiddleearth.connect.bungee.Handler.VanishHandler;
+import de.myzelyam.api.vanish.BungeePlayerHideEvent;
+import de.myzelyam.api.vanish.BungeePlayerShowEvent;
+import java.util.concurrent.TimeUnit;
+import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ProxyServer;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.PlayerDisconnectEvent;
 import net.md_5.bungee.api.event.PostLoginEvent;
 import net.md_5.bungee.api.event.ServerConnectEvent;
@@ -20,12 +26,24 @@ import net.md_5.bungee.event.EventHandler;
  */
 public class ConnectionListener implements Listener {
 
-    public ConnectionListener() {
-    }
-
+    //private Map<String,String> playerServers = new HashMap<>();
+    
     @EventHandler
     public void onJoin(PostLoginEvent event) {
-        
+//Logger.getGlobal().info("onJoin");
+        ProxyServer.getInstance().getScheduler().schedule(ConnectBungeePlugin.getInstance(), () -> {
+            ProxiedPlayer player = event.getPlayer();
+//    Logger.getGlobal().info("connect "+VanishHandler.isPvSupport()+" "
+  //                                    +VanishHandler.isVanished(event.getPlayer())+" "
+    //                                  +event.getPlayer().hasPermission("pv.joinvanished"));
+            if(event.getPlayer().hasPermission("pv.joinvanished")) {
+                VanishHandler.vanish(player);
+            }
+            if(!VanishHandler.isVanished(event.getPlayer())) {
+    //Logger.getGlobal().info("onJoin send");
+                sendJoinMessage(player);
+            }
+        }, ConnectBungeePlugin.getConnectDelay(), TimeUnit.MILLISECONDS);
         /*Logger.getGlobal().info("server: "+event.getPlayer().getServer());
         if(event.getPlayer().getServer()!=null) 
             Logger.getGlobal().info(event.getPlayer().getServer().getInfo().getName());
@@ -34,7 +52,30 @@ public class ConnectionListener implements Listener {
     }
     
     @EventHandler
-    public void onConnect(ServerConnectEvent event) {
+    public void onDisconnect(PlayerDisconnectEvent event) {
+        ProxiedPlayer player = event.getPlayer();
+//Logger.getGlobal().info("disconnect "+pvSupport+" "+BungeeVanishAPI.isInvisible(player));
+        if(!VanishHandler.isVanished(player)) {
+            sendLeaveMessage(player);
+        }
+    }
+    
+    @EventHandler
+    public void onVanish(BungeePlayerHideEvent event) {
+//Logger.getGlobal().info("vanish "+event.getPlayer().getName());
+        VanishHandler.vanish(event.getPlayer());
+        sendLeaveMessage(event.getPlayer());
+    }
+    
+    @EventHandler
+    public void onVanish(BungeePlayerShowEvent event) {
+//Logger.getGlobal().info("unvanish "+event.getPlayer().getName());
+        VanishHandler.unvanish(event.getPlayer());
+        sendJoinMessage(event.getPlayer());
+    }
+    
+    @EventHandler
+    public void handleLegacyPlayers(ServerConnectEvent event) {
 //Logger.getGlobal().info("target: "+event.getTarget()+" "+event.getReason());
 //Logger.getGlobal().info(""+ ConnectBungeePlugin.getLegacyPlayers().contains(event.getPlayer().getUniqueId()));
 //Logger.getGlobal().info(""+ ConnectBungeePlugin.getLegacyRedirectFrom()+" "+ConnectBungeePlugin.getLegacyRedirectTo()+" "+ConnectBungeePlugin.isLegacyRedirectEnabled());
@@ -51,9 +92,20 @@ public class ConnectionListener implements Listener {
         }
     }
     
-    @EventHandler
-    public void onDisconnect(PlayerDisconnectEvent event) {
-        //TODO: leave messages
+    private void sendJoinMessage(ProxiedPlayer player) {
+        ProxyServer.getInstance().getPlayers().forEach(p -> {
+//Logger.getGlobal().info("onJoin send message");
+                p.sendMessage(new ComponentBuilder(player.getName()+" joined the MCME-Network.")
+                                            .color(ChatColor.YELLOW).create());
+        });
+    }
+    
+    private void sendLeaveMessage(ProxiedPlayer player) {
+        ProxyServer.getInstance().getPlayers().forEach(p -> {
+//Logger.getGlobal().info("onJoin send message");
+                p.sendMessage(new ComponentBuilder(player.getName()+" left the MCME-Network.")
+                                            .color(ChatColor.YELLOW).create());
+        });
     }
 
 }
