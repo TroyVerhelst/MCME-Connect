@@ -41,23 +41,47 @@ public class CommandListener implements Listener {
             if(message[0].equalsIgnoreCase("/tp") && message.length>1) {
 //Logger.getGlobal().info("/tp!");
                 if(player.hasPermission(Permission.TP)) {
-                    ProxiedPlayer destination = ProxyServer.getInstance().getPlayer(message[1]);
-                    if(destination != null 
-                            && !destination.getServer().getInfo().getName()
-                                .equals(player.getServer().getInfo().getName())) {
-                        if(player.hasPermission(Permission.WORLD+"."+destination.getServer()
-                                                                       .getInfo().getName())) {
-                            if(!TpHandler.handle(player.getName(), 
-                                     destination.getServer().getInfo().getName(),
-                                     destination.getName())) {
-                                sendError(player);
+                    if(message.length<3) {
+                        ProxiedPlayer destination = ProxyServer.getInstance().getPlayer(message[1]);
+                        if(destination != null 
+                                && !destination.getServer().getInfo().getName()
+                                    .equals(player.getServer().getInfo().getName())) {
+                            if(player.hasPermission(Permission.WORLD+"."+destination.getServer()
+                                                                           .getInfo().getName())) {
+                                if(!TpHandler.handle(player.getName(), 
+                                         destination.getServer().getInfo().getName(),
+                                         destination.getName())) {
+                                    sendError(player);
+                                }
+                            } else {
+                                player.sendMessage(new ComponentBuilder("You don't have permission to enter "
+                                                                          +destination.getName()+"'s world.")
+                                                        .color(ChatColor.RED).create());
                             }
-                        } else {
-                            player.sendMessage(new ComponentBuilder("You don't have permission to enter "
-                                                                      +destination+"'s world.")
-                                                    .color(ChatColor.RED).create());
+                            event.setCancelled(true);
                         }
-                        event.setCancelled(true);
+                    } else {
+                        if(player.hasPermission(Permission.TP_OTHER)) {
+                            ProxiedPlayer source = ProxyServer.getInstance().getPlayer(message[1]);
+                            ProxiedPlayer destination = ProxyServer.getInstance().getPlayer(message[2]);
+                            if(source !=null && destination != null 
+                                    && !source.getServer().getInfo().getName()
+                                        .equals(destination.getServer().getInfo().getName())) {
+                                if(source.hasPermission(Permission.WORLD+"."+destination.getServer()
+                                                                               .getInfo().getName())) {
+                                    if(!TpHandler.handle(source.getName(), 
+                                             destination.getServer().getInfo().getName(),
+                                             destination.getName())) {
+                                        sendError(player);
+                                    }
+                                } else {
+                                    player.sendMessage(new ComponentBuilder(source.getName()+" is not allowed to enter "
+                                                                              +destination.getName()+"'s world.")
+                                                            .color(ChatColor.RED).create());
+                                }
+                                event.setCancelled(true);
+                            }
+                        }
                     }
                 }
             } else if(message[0].equalsIgnoreCase("/tphere") && message.length>1) {

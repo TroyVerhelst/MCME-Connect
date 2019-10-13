@@ -12,6 +12,7 @@ package com.mcmiddleearth.connect;
 public class Permission {
     
     public static final String TP           = "mcmeconnect.tp";
+    public static final String TP_OTHER     = "mcmeconnect.tp.other";
     public static final String TPHERE       = "mcmeconnect.tphere";
     public static final String WORLD        = "mcmeconnect.world";
     public static final String WATCHDOG     = "mcmeconnect.watchdog";
