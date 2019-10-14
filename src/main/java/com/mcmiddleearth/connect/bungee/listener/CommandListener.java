@@ -42,7 +42,7 @@ public class CommandListener implements Listener {
 //Logger.getGlobal().info("/tp!");
                 if(player.hasPermission(Permission.TP)) {
                     if(message.length<3) {
-                        ProxiedPlayer destination = ProxyServer.getInstance().getPlayer(message[1]);
+                        ProxiedPlayer destination = getPlayer(message[1]);
                         if(destination != null 
                                 && !destination.getServer().getInfo().getName()
                                     .equals(player.getServer().getInfo().getName())) {
@@ -62,8 +62,8 @@ public class CommandListener implements Listener {
                         }
                     } else {
                         if(player.hasPermission(Permission.TP_OTHER)) {
-                            ProxiedPlayer source = ProxyServer.getInstance().getPlayer(message[1]);
-                            ProxiedPlayer destination = ProxyServer.getInstance().getPlayer(message[2]);
+                            ProxiedPlayer source = getPlayer(message[1]);
+                            ProxiedPlayer destination = getPlayer(message[2]);
                             if(source !=null && destination != null 
                                     && !source.getServer().getInfo().getName()
                                         .equals(destination.getServer().getInfo().getName())) {
@@ -87,7 +87,7 @@ public class CommandListener implements Listener {
             } else if(message[0].equalsIgnoreCase("/tphere") && message.length>1) {
 //Logger.getGlobal().info("/tphere!");
                 if(player.hasPermission(Permission.TPHERE)) {
-                    ProxiedPlayer target = ProxyServer.getInstance().getPlayer(message[1]);
+                    ProxiedPlayer target = getPlayer(message[1]);
 //Logger.getGlobal().info("/tphere! 2");
                     if(target != null 
                             && !target.getServer().getInfo().getName()
@@ -198,6 +198,12 @@ public class CommandListener implements Listener {
     private void sendError(ProxiedPlayer player) {
         player.sendMessage(new ComponentBuilder("There was an error!")
                             .color(ChatColor.RED).create());    
+    }
+    
+    private ProxiedPlayer getPlayer(String name) {
+        return ProxyServer.getInstance().getPlayers().stream()
+                .filter(player -> player.getName().toLowerCase().startsWith(name.toLowerCase()))
+                .findFirst().orElse(null);
     }
     
 }

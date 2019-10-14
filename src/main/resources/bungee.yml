@@ -6,6 +6,8 @@ author: Eriol_Eandur
 permissions:
     mcmeconnect.tp:
         description: allows a player to use /tp across servers
+    mcmeconnect.tp.other:
+        description: allows a player to use tp other players across servers
     mcmeconnect.world:
         description: addition of .<servername> allows a player to /tp or /mvtp cross servers
     mcmeconnect.watchdog:
