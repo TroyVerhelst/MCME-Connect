@@ -26,17 +26,17 @@ import org.bukkit.scheduler.BukkitRunnable;
  *
  * @author Eriol_Eandur
  */
-public class PluginListener implements PluginMessageListener {
+public class ConnectPluginListener implements PluginMessageListener {
     
     
-    public PluginListener() {
+    public ConnectPluginListener() {
     }
     
     
 
     @Override
     public void onPluginMessageReceived(String channel, Player player, byte[] message) {
-Logger.getGlobal().info("Pugin Message! "+player);
+//Logger.getGlobal().info("Pugin Message! "+player);
         if (!channel.equals(Channel.MAIN)) {
           return;
         }
@@ -47,7 +47,7 @@ Logger.getGlobal().info("Pugin Message! "+player);
             String worldData = in.readUTF();
             String[] locData = in.readUTF().split(";");
             runAfterArrival(playerData, source -> {
-Logger.getGlobal().info("TPPOS! "+source);
+//Logger.getGlobal().info("TPPOS! "+source);
                 source.sendMessage(ChatColor.GOLD+"Teleporting ...");
                 World world = Bukkit.getWorld(worldData);
                 if(world!=null) {
@@ -110,7 +110,7 @@ Logger.getGlobal().info("TPPOS! "+source);
             int counter = 40;
             @Override
             public void run() {
-Logger.getGlobal().info("try "+counter);
+//Logger.getGlobal().info("try "+counter);
                 Player source = Bukkit.getPlayer(playerName);
                 if(source==null) {
                     if(counter==0) {

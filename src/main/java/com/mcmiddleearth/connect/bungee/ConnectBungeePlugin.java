@@ -10,10 +10,11 @@ package com.mcmiddleearth.connect.bungee;
  * @author Eriol_Eandur
  */
 import com.mcmiddleearth.connect.Channel;
-import com.mcmiddleearth.connect.bungee.Handler.VanishHandler;
+import com.mcmiddleearth.connect.bungee.vanish.VanishHandler;
 import com.mcmiddleearth.connect.bungee.listener.PluginMessageListener;
 import com.mcmiddleearth.connect.bungee.listener.ConnectionListener;
 import com.mcmiddleearth.connect.bungee.listener.CommandListener;
+import com.mcmiddleearth.connect.bungee.vanish.VanishListener;
 import com.mcmiddleearth.connect.bungee.watchdog.ServerWatchdog;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -29,7 +30,6 @@ import java.util.logging.Logger;
 import lombok.Getter;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.plugin.Plugin;
-import org.yaml.snakeyaml.Yaml;
 
 public class ConnectBungeePlugin extends Plugin {
     
@@ -68,7 +68,10 @@ public class ConnectBungeePlugin extends Plugin {
         loadConfig();
         loadLegacyPlayers();
         VanishHandler.setPvSupport(config.getBoolean("premiumVanish", false));
-        VanishHandler.loadVanished();
+        if(VanishHandler.isPvSupport()) {
+            VanishHandler.loadVanished();
+            getProxy().getPluginManager().registerListener(this, new VanishListener());
+        }
         //loadLegacyRedirect();
         ProxyServer.getInstance().registerChannel(Channel.MAIN);
         getProxy().getPluginManager().registerListener(this, new PluginMessageListener());

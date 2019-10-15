@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.mcmiddleearth.connect.bungee.Handler;
+package com.mcmiddleearth.connect.bungee.vanish;
 
 import com.mcmiddleearth.connect.bungee.ConnectBungeePlugin;
 import java.io.File;
@@ -19,6 +19,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import lombok.Getter;
 import lombok.Setter;
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.ProxyServer;
+import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 
 /**
@@ -38,11 +41,45 @@ public class VanishHandler {
     public static void vanish(ProxiedPlayer player) {
         vanishedPlayers.add(player.getUniqueId());
         saveVanished();
+        //send info message to players with pv.see
+        ProxyServer.getInstance().getPlayers().stream()
+                .filter(p -> p.hasPermission("pv.see")).forEach(p -> {
+//Logger.getGlobal().info("onJoin send message");
+                p.sendMessage(new ComponentBuilder(player.getName()+" vanished.")
+                                            .color(ChatColor.GREEN).create());
+        });
+    }
+    
+    public static void joinVanished(ProxiedPlayer player) {
+        vanish(player);
+        //send info message to players with pv.see
+        ProxyServer.getInstance().getPlayers().stream()
+                .filter(p -> p.hasPermission("pv.see")).forEach(p -> {
+//Logger.getGlobal().info("onJoin send message");
+                p.sendMessage(new ComponentBuilder(player.getName()+" joined the MCME-Network while being vanished.")
+                                            .color(ChatColor.GREEN).create());
+        });
     }
     
     public static void unvanish(ProxiedPlayer player) {
         vanishedPlayers.remove(player.getUniqueId());
         saveVanished();
+        ProxyServer.getInstance().getPlayers().stream()
+                .filter(p -> p.hasPermission("pv.see")).forEach(p -> {
+//Logger.getGlobal().info("onJoin send message");
+                p.sendMessage(new ComponentBuilder(player.getName()+" unvanished.")
+                                            .color(ChatColor.GREEN).create());
+        });
+    }
+    
+    public static void quitVanished(ProxiedPlayer player) {
+        //send info message to players with pv.see
+        ProxyServer.getInstance().getPlayers().stream()
+                .filter(p -> p.hasPermission("pv.see")).forEach(p -> {
+//Logger.getGlobal().info("onJoin send message");
+                p.sendMessage(new ComponentBuilder(player.getName()+" left the MCME-Network while being vanished.")
+                                            .color(ChatColor.GREEN).create());
+        });
     }
     
     public static boolean isVanished(ProxiedPlayer player) {

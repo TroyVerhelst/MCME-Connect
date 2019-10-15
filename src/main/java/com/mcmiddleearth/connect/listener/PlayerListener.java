@@ -5,11 +5,14 @@
  */
 package com.mcmiddleearth.connect.listener;
 
+import com.mcmiddleearth.connect.ConnectPlugin;
+import com.mcmiddleearth.connect.statistics.StatisticDBConnector;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.Listener;
+import org.bukkit.scheduler.BukkitRunnable;
 
 /**
  *

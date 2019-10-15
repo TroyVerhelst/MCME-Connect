@@ -5,5 +5,12 @@ legacyRedirect:
 disableMVTP:
 - newPlayer
 connectDelay: 200
-premiumVanish: false
+premiumVanish: true
 themedbuildWorld: themedbuilds
+syncStatistic: true
+database:
+  dbName: development
+  user: development
+  password: development
+  ip: localhost
+  port: 3306

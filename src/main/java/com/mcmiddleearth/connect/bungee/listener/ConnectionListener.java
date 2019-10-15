@@ -6,7 +6,7 @@
 package com.mcmiddleearth.connect.bungee.listener;
 
 import com.mcmiddleearth.connect.bungee.ConnectBungeePlugin;
-import com.mcmiddleearth.connect.bungee.Handler.VanishHandler;
+import com.mcmiddleearth.connect.bungee.vanish.VanishHandler;
 import de.myzelyam.api.vanish.BungeePlayerHideEvent;
 import de.myzelyam.api.vanish.BungeePlayerShowEvent;
 import java.util.concurrent.TimeUnit;
@@ -37,7 +37,7 @@ public class ConnectionListener implements Listener {
   //                                    +VanishHandler.isVanished(event.getPlayer())+" "
     //                                  +event.getPlayer().hasPermission("pv.joinvanished"));
             if(event.getPlayer().hasPermission("pv.joinvanished")) {
-                VanishHandler.vanish(player);
+                VanishHandler.joinVanished(player);
             }
             if(!VanishHandler.isVanished(event.getPlayer())) {
     //Logger.getGlobal().info("onJoin send");
@@ -55,23 +55,11 @@ public class ConnectionListener implements Listener {
     public void onDisconnect(PlayerDisconnectEvent event) {
         ProxiedPlayer player = event.getPlayer();
 //Logger.getGlobal().info("disconnect "+pvSupport+" "+BungeeVanishAPI.isInvisible(player));
-        if(!VanishHandler.isVanished(player)) {
+        if(VanishHandler.isPvSupport() && !VanishHandler.isVanished(player)) {
             sendLeaveMessage(player);
+        } else {
+            VanishHandler.quitVanished(player);
         }
-    }
-    
-    @EventHandler
-    public void onVanish(BungeePlayerHideEvent event) {
-//Logger.getGlobal().info("vanish "+event.getPlayer().getName());
-        VanishHandler.vanish(event.getPlayer());
-        sendLeaveMessage(event.getPlayer());
-    }
-    
-    @EventHandler
-    public void onVanish(BungeePlayerShowEvent event) {
-//Logger.getGlobal().info("unvanish "+event.getPlayer().getName());
-        VanishHandler.unvanish(event.getPlayer());
-        sendJoinMessage(event.getPlayer());
     }
     
     @EventHandler
@@ -92,7 +80,7 @@ public class ConnectionListener implements Listener {
         }
     }
     
-    private void sendJoinMessage(ProxiedPlayer player) {
+    public static void sendJoinMessage(ProxiedPlayer player) {
         ProxyServer.getInstance().getPlayers().forEach(p -> {
 //Logger.getGlobal().info("onJoin send message");
                 p.sendMessage(new ComponentBuilder(player.getName()+" joined the MCME-Network.")
@@ -100,7 +88,7 @@ public class ConnectionListener implements Listener {
         });
     }
     
-    private void sendLeaveMessage(ProxiedPlayer player) {
+    public static void sendLeaveMessage(ProxiedPlayer player) {
         ProxyServer.getInstance().getPlayers().forEach(p -> {
 //Logger.getGlobal().info("onJoin send message");
                 p.sendMessage(new ComponentBuilder(player.getName()+" left the MCME-Network.")
