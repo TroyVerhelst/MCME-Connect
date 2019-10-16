@@ -69,6 +69,7 @@ public class ConnectBungeePlugin extends Plugin {
         loadLegacyPlayers();
         VanishHandler.setPvSupport(config.getBoolean("premiumVanish", false));
         if(VanishHandler.isPvSupport()) {
+Logger.getGlobal().info("enable vanish support ");
             VanishHandler.loadVanished();
             getProxy().getPluginManager().registerListener(this, new VanishListener());
         }

@@ -5,10 +5,9 @@
  */
 package com.mcmiddleearth.connect.bungee.listener;
 
+import com.mcmiddleearth.connect.Permission;
 import com.mcmiddleearth.connect.bungee.ConnectBungeePlugin;
 import com.mcmiddleearth.connect.bungee.vanish.VanishHandler;
-import de.myzelyam.api.vanish.BungeePlayerHideEvent;
-import de.myzelyam.api.vanish.BungeePlayerShowEvent;
 import java.util.concurrent.TimeUnit;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ProxyServer;
@@ -26,71 +25,58 @@ import net.md_5.bungee.event.EventHandler;
  */
 public class ConnectionListener implements Listener {
 
-    //private Map<String,String> playerServers = new HashMap<>();
-    
     @EventHandler
     public void onJoin(PostLoginEvent event) {
-//Logger.getGlobal().info("onJoin");
         ProxyServer.getInstance().getScheduler().schedule(ConnectBungeePlugin.getInstance(), () -> {
             ProxiedPlayer player = event.getPlayer();
-//    Logger.getGlobal().info("connect "+VanishHandler.isPvSupport()+" "
-  //                                    +VanishHandler.isVanished(event.getPlayer())+" "
-    //                                  +event.getPlayer().hasPermission("pv.joinvanished"));
-            if(event.getPlayer().hasPermission("pv.joinvanished")) {
-                VanishHandler.joinVanished(player);
-            }
-            if(!VanishHandler.isVanished(event.getPlayer())) {
-    //Logger.getGlobal().info("onJoin send");
-                sendJoinMessage(player);
+            if(!VanishHandler.isPvSupport()) {
+                sendJoinMessage(player,false);
+            } else {
+                VanishHandler.join(player);
             }
         }, ConnectBungeePlugin.getConnectDelay(), TimeUnit.MILLISECONDS);
-        /*Logger.getGlobal().info("server: "+event.getPlayer().getServer());
-        if(event.getPlayer().getServer()!=null) 
-            Logger.getGlobal().info(event.getPlayer().getServer().getInfo().getName());
-        Logger.getGlobal().info("reconnect: "+event.getPlayer().getReconnectServer());*/
-        //TODO: join messages
     }
     
     @EventHandler
     public void onDisconnect(PlayerDisconnectEvent event) {
         ProxiedPlayer player = event.getPlayer();
-//Logger.getGlobal().info("disconnect "+pvSupport+" "+BungeeVanishAPI.isInvisible(player));
-        if(VanishHandler.isPvSupport() && !VanishHandler.isVanished(player)) {
-            sendLeaveMessage(player);
+        if(!VanishHandler.isPvSupport()) {
+            sendLeaveMessage(player,false);
         } else {
-            VanishHandler.quitVanished(player);
+            VanishHandler.quit(player);
         }
     }
     
     @EventHandler
     public void handleLegacyPlayers(ServerConnectEvent event) {
-//Logger.getGlobal().info("target: "+event.getTarget()+" "+event.getReason());
-//Logger.getGlobal().info(""+ ConnectBungeePlugin.getLegacyPlayers().contains(event.getPlayer().getUniqueId()));
-//Logger.getGlobal().info(""+ ConnectBungeePlugin.getLegacyRedirectFrom()+" "+ConnectBungeePlugin.getLegacyRedirectTo()+" "+ConnectBungeePlugin.isLegacyRedirectEnabled());
         if(event.getReason().equals(ServerConnectEvent.Reason.JOIN_PROXY)) {
             if(!ConnectBungeePlugin.isLegacyRedirectEnabled()) {
                 return;
             }
-//Logger.getGlobal().info("1");
             if(ConnectBungeePlugin.getLegacyPlayers().contains(event.getPlayer().getUniqueId())
                     && event.getTarget().getName().equals(ConnectBungeePlugin.getLegacyRedirectFrom())) {
-//Logger.getGlobal().info("2");
                 event.setTarget(ProxyServer.getInstance().getServerInfo(ConnectBungeePlugin.getLegacyRedirectTo()));
             }
         }
     }
     
-    public static void sendJoinMessage(ProxiedPlayer player) {
-        ProxyServer.getInstance().getPlayers().forEach(p -> {
-//Logger.getGlobal().info("onJoin send message");
+    public static void sendJoinMessage(ProxiedPlayer player, boolean fake) {
+        ProxyServer.getInstance().getPlayers().stream()
+                .filter(p -> !VanishHandler.isPvSupport() 
+                          || !fake 
+                          || !p.hasPermission(Permission.VANISH_SEE))
+                .forEach(p -> {
                 p.sendMessage(new ComponentBuilder(player.getName()+" joined the MCME-Network.")
                                             .color(ChatColor.YELLOW).create());
         });
     }
     
-    public static void sendLeaveMessage(ProxiedPlayer player) {
-        ProxyServer.getInstance().getPlayers().forEach(p -> {
-//Logger.getGlobal().info("onJoin send message");
+    public static void sendLeaveMessage(ProxiedPlayer player, boolean fake) {
+        ProxyServer.getInstance().getPlayers().stream()
+                .filter(p -> !VanishHandler.isPvSupport() 
+                          || !fake 
+                          || !p.hasPermission(Permission.VANISH_SEE))
+                .forEach(p -> {
                 p.sendMessage(new ComponentBuilder(player.getName()+" left the MCME-Network.")
                                             .color(ChatColor.YELLOW).create());
         });

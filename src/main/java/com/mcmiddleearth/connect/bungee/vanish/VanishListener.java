@@ -21,14 +21,12 @@ public class VanishListener implements Listener {
     public void onVanish(BungeePlayerHideEvent event) {
 //Logger.getGlobal().info("vanish "+event.getPlayer().getName());
         VanishHandler.vanish(event.getPlayer());
-        ConnectionListener.sendLeaveMessage(event.getPlayer());
     }
     
     @EventHandler
     public void onVanish(BungeePlayerShowEvent event) {
 //Logger.getGlobal().info("unvanish "+event.getPlayer().getName());
         VanishHandler.unvanish(event.getPlayer());
-        ConnectionListener.sendJoinMessage(event.getPlayer());
     }
     
     
