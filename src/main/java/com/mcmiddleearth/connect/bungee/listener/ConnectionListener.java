@@ -5,10 +5,16 @@
  */
 package com.mcmiddleearth.connect.bungee.listener;
 
+import com.google.common.io.ByteArrayDataOutput;
+import com.google.common.io.ByteStreams;
+import com.mcmiddleearth.connect.Channel;
 import com.mcmiddleearth.connect.Permission;
 import com.mcmiddleearth.connect.bungee.ConnectBungeePlugin;
 import com.mcmiddleearth.connect.bungee.vanish.VanishHandler;
+import github.scarsz.discordsrv.dependencies.google.common.collect.Iterables;
+import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -34,7 +40,7 @@ public class ConnectionListener implements Listener {
             } else {
                 VanishHandler.join(player);
             }
-        }, ConnectBungeePlugin.getConnectDelay(), TimeUnit.MILLISECONDS);
+        }, 5, TimeUnit.SECONDS);
     }
     
     @EventHandler
@@ -69,6 +75,15 @@ public class ConnectionListener implements Listener {
                 p.sendMessage(new ComponentBuilder(player.getName()+" joined the MCME-Network.")
                                             .color(ChatColor.YELLOW).create());
         });
+        ProxiedPlayer other = ProxyServer.getInstance().getPlayers().iterator().next();
+Logger.getGlobal().info("send Discord join Message to: "+other);
+        if(other != null) {
+            ByteArrayDataOutput out = ByteStreams.newDataOutput();
+            out.writeUTF("Discord");
+            out.writeUTF(player.getName());
+            out.writeUTF("join");
+            other.getServer().getInfo().sendData(Channel.MAIN, out.toByteArray(),true);
+        }
     }
     
     public static void sendLeaveMessage(ProxiedPlayer player, boolean fake) {
@@ -80,6 +95,27 @@ public class ConnectionListener implements Listener {
                 p.sendMessage(new ComponentBuilder(player.getName()+" left the MCME-Network.")
                                             .color(ChatColor.YELLOW).create());
         });
+        ProxiedPlayer other = getOtherPlayer(player); 
+Logger.getGlobal().info("send Discord leave Message to: "+other);
+            if(other != null) {
+            ByteArrayDataOutput out = ByteStreams.newDataOutput();
+            out.writeUTF(Channel.DISCORD);
+            out.writeUTF(player.getName());
+            out.writeUTF("leave");
+            other.getServer().getInfo().sendData(Channel.MAIN, out.toByteArray(),false);
+        }
     }
+
+    private static ProxiedPlayer getOtherPlayer(ProxiedPlayer player) {
+        Iterator<ProxiedPlayer> iterator = ProxyServer.getInstance().getPlayers().iterator();
+        if(!iterator.hasNext()) return null;
+        ProxiedPlayer other = iterator.next();
+        if(other.equals(player)) {
+            if(!iterator.hasNext()) return null;
+            other = iterator.next();
+        }
+        return other;
+    }
+    
 
 }

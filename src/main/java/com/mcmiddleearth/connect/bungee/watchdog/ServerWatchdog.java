@@ -7,6 +7,8 @@ package com.mcmiddleearth.connect.bungee.watchdog;
 
 import com.mcmiddleearth.connect.Permission;
 import com.mcmiddleearth.connect.bungee.ConnectBungeePlugin;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ProxyServer;
@@ -23,18 +25,37 @@ public class ServerWatchdog {
     
     public ServerWatchdog() {
         watchdog = ProxyServer.getInstance().getScheduler().schedule(ConnectBungeePlugin.getInstance(), () -> {
-             ProxyServer.getInstance().getServers().forEach((name,info) -> {
-                 info.ping((result, error) -> {
+            List<String> downList = new ArrayList<>();
+            ProxyServer.getInstance().getServers().forEach((name,info) -> {
+                info.ping((result, error) -> {
                     if(error!=null && !error.getMessage().equals("")) {
-                        ProxyServer.getInstance().getPlayers().stream()
-                                   .filter(player -> player.hasPermission(Permission.WATCHDOG))
-                                   .forEach(player -> player.sendMessage(
-                                           new ComponentBuilder("WARNING! Server '"+ChatColor.DARK_RED
-                                                                        +name+ChatColor.RED+"' seems to be down.")
-                                                               .color(ChatColor.RED).create()));
+                        downList.add(name);
                     }
-                 });
-             });
+                });
+            });
+            ProxyServer.getInstance().getScheduler().schedule(ConnectBungeePlugin.getInstance(),() -> {
+                if(!downList.isEmpty()) {
+                    String downserver = "";
+                    String separator = "";
+                    for(String name: downList) {
+                        downserver = downserver + separator + ChatColor.DARK_RED+name;
+                        separator = ", ";
+                    }
+                    int last = downserver.lastIndexOf(',');
+                    if(last>0) {
+                        downserver = downserver.substring(0, last)+" and"+downserver.substring(last+1);
+                    }
+                    String finalDown = downserver;
+                    String single = (downList.size()>1?"":"s");
+                    ProxyServer.getInstance().getPlayers().stream()
+                               .filter(player -> player.hasPermission(Permission.WATCHDOG))
+                               .forEach(player -> player.sendMessage(
+                                       new ComponentBuilder("WARNING! Server '"+ChatColor.DARK_RED
+                                                                    +finalDown+ChatColor.RED+"' seem"
+                                                                    +single+ " to be down.")
+                                                           .color(ChatColor.RED).create()));
+                }
+            }, 10, TimeUnit.SECONDS);
         }, 2, 2, TimeUnit.MINUTES);
     }  
     

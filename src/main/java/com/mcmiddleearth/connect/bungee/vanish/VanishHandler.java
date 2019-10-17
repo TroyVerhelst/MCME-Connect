@@ -64,7 +64,7 @@ public class VanishHandler {
                                                 .color(ChatColor.GREEN).create());
             });
         } else {
-            ConnectionListener.sendJoinMessage(player, false);
+            ConnectionListener.sendLeaveMessage(player, false);
         }
     }
     

@@ -26,6 +26,9 @@ public class ConnectPlugin extends JavaPlugin {
     @Getter
     private static StatisticDBConnector statisticStorage;
     
+    @Getter
+    private static String discordChannel;
+    
     private BukkitTask statisticUpdater;
     @Override
     public void onEnable() {
@@ -35,6 +38,7 @@ public class ConnectPlugin extends JavaPlugin {
             statisticStorage = new StatisticDBConnector(getConfig().getConfigurationSection("database"));
             Bukkit.getPluginManager().registerEvents(new StatisticListener(), this);
         }
+        discordChannel = getConfig().getString("discordChannel","");
         Bukkit.getServer().getMessenger()
                 .registerOutgoingPluginChannel(this, Channel.MAIN);
         Bukkit.getPluginManager().registerEvents(new PlayerListener(), this);

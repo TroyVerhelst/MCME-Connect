@@ -8,6 +8,7 @@ connectDelay: 200
 premiumVanish: true
 themedbuildWorld: themedbuilds
 syncStatistic: true
+discordChannel: Global
 database:
   dbName: development
   user: development

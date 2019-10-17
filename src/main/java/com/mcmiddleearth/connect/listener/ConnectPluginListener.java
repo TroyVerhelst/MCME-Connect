@@ -10,6 +10,9 @@ import com.google.common.io.ByteStreams;
 import com.mcmiddleearth.connect.Channel;
 import com.mcmiddleearth.connect.ConnectPlugin;
 import com.onarandombox.MultiverseCore.MultiverseCore;
+import github.scarsz.discordsrv.DiscordSRV;
+import github.scarsz.discordsrv.dependencies.jda.core.entities.TextChannel;
+import github.scarsz.discordsrv.util.DiscordUtil;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.function.Consumer;
@@ -36,7 +39,7 @@ public class ConnectPluginListener implements PluginMessageListener {
 
     @Override
     public void onPluginMessageReceived(String channel, Player player, byte[] message) {
-//Logger.getGlobal().info("Pugin Message! "+player);
+Logger.getGlobal().info("Pugin Message! "+player);
         if (!channel.equals(Channel.MAIN)) {
           return;
         }
@@ -102,9 +105,42 @@ public class ConnectPluginListener implements PluginMessageListener {
                 p.teleport(spawn);//.add(0.5,0,0.5));
             });
             //}.runTaskLater(ConnectPlugin.getInstance(), delay);
+        } else if(subchannel.equals(Channel.DISCORD)) {
+            String name = in.readUTF();
+            String event = in.readUTF();
+Logger.getGlobal().info("Recieved discord message: "+name+" - "+event);
+            //TextChannel discordChannel = DiscordUtil.getTextChannelById("global");
+            if(event.equals("join")) {
+                sendDiscord(":bangbang: **"+name+" joined the MCME-Network.**");
+            } else if(event.equals("leave")) {
+                sendDiscord(":x: **"+name+" left the MCME-Network.**");
+            }
+            
         }
     }
     
+    private void sendDiscord(String message) {
+        String discordChannel = ConnectPlugin.getDiscordChannel();
+        if ((discordChannel != null) && (!discordChannel.equals("")))
+        {
+          DiscordSRV discordPlugin = DiscordSRV.getPlugin();
+          if (discordPlugin != null)
+          {
+            TextChannel channel = discordPlugin
+                    .getDestinationTextChannelForGameChannelName(discordChannel);
+            if (channel != null) {
+              DiscordUtil.sendMessage(channel, message, 0, false);
+            } else {
+              Logger.getLogger("TheGaffer").warning("Discord channel not found.");
+            }
+          }
+          else
+          {
+            Logger.getLogger("TheGaffer").warning("DiscordSRV plugin not found.");
+          }
+        }
+    }
+
     private void runAfterArrival(String playerName, Consumer<Player> callback) {
         new BukkitRunnable() {
             int counter = 40;
