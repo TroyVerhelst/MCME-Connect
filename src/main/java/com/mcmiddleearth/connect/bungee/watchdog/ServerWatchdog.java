@@ -39,7 +39,7 @@ public class ServerWatchdog {
                 if(!downList.isEmpty()) {
                     String downserver = "";
                     String separator = "";
-                    downList.sort((one,two) -> one.compareToIgnoreCase(two));
+                    downList.sort((one,two) -> (one==null?-1:(two==null?1:one.compareToIgnoreCase(two))));
                     for(int i=0; i<downList.size(); i++) {
                         downserver = downserver + separator + ChatColor.DARK_RED+downList.get(i);
                         separator = ", ";

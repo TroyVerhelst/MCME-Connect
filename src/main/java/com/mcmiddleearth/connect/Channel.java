@@ -22,7 +22,7 @@ package com.mcmiddleearth.connect;
  */
 public class Channel {
     
-    public static final String MAIN = "mcme.connect";
+    public static final String MAIN = "mcme:connect";
     public static final String STATISTIC = "statistic";
     
     public static final String ALL = "";
