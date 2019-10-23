@@ -14,26 +14,37 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.mcmiddleearth.connect;
+package com.mcmiddleearth.connect.bungee.warp;
+
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  *
  * @author Eriol_Eandur
  */
-public class Channel {
+public class Warp {
     
-    public static final String MAIN = "mcme:connect";
-    public static final String STATISTIC = "statistic";
+    @Getter
+    @Setter
+    private String server;
     
-    public static final String ALL = "";
-    public static final String CONNECT  = "Connect";
-    public static final String TPPOS    = "tppos";
-    public static final String TP       = "tp";
-    public static final String MESSAGE  = "message";
-    public static final String TITLE    = "title";
-    public static final String SPAWN    = "spawn";
-    public static final String DISCORD  = "Discord";
-    public static final String WORLD_UUID  = "world_uuid";
+    @Getter
+    @Setter
+    private String world;
+    
+    @Getter
+    @Setter
+    private String name;
+    
+    @Getter
+    @Setter
+    private String location;
+    
+    @Getter
+    @Setter
+    private String welcomeMessage;
+    
+    
     
 }
-

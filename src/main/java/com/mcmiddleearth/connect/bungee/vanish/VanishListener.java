@@ -14,26 +14,30 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.mcmiddleearth.connect;
+package com.mcmiddleearth.connect.bungee.vanish;
+
+import de.myzelyam.api.vanish.BungeePlayerHideEvent;
+import de.myzelyam.api.vanish.BungeePlayerShowEvent;
+import net.md_5.bungee.api.plugin.Listener;
+import net.md_5.bungee.event.EventHandler;
 
 /**
  *
  * @author Eriol_Eandur
  */
-public class Channel {
+public class VanishListener implements Listener {
     
-    public static final String MAIN = "mcme:connect";
-    public static final String STATISTIC = "statistic";
+    @EventHandler
+    public void onVanish(BungeePlayerHideEvent event) {
+//Logger.getGlobal().info("vanish "+event.getPlayer().getName());
+        VanishHandler.vanish(event.getPlayer());
+    }
     
-    public static final String ALL = "";
-    public static final String CONNECT  = "Connect";
-    public static final String TPPOS    = "tppos";
-    public static final String TP       = "tp";
-    public static final String MESSAGE  = "message";
-    public static final String TITLE    = "title";
-    public static final String SPAWN    = "spawn";
-    public static final String DISCORD  = "Discord";
-    public static final String WORLD_UUID  = "world_uuid";
+    @EventHandler
+    public void onVanish(BungeePlayerShowEvent event) {
+//Logger.getGlobal().info("unvanish "+event.getPlayer().getName());
+        VanishHandler.unvanish(event.getPlayer());
+    }
+    
     
 }
-

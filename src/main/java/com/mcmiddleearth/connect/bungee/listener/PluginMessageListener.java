@@ -1,7 +1,18 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (C) 2019 MCME
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package com.mcmiddleearth.connect.bungee.listener;
 
@@ -12,6 +23,7 @@ import com.mcmiddleearth.connect.bungee.Handler.TpposHandler;
 import com.mcmiddleearth.connect.Channel;
 import com.mcmiddleearth.connect.bungee.Handler.ChatMessageHandler;
 import com.mcmiddleearth.connect.bungee.Handler.TitleHandler;
+import com.mcmiddleearth.connect.bungee.warp.MyWarpDBConnector;
 import java.util.logging.Logger;
 import net.md_5.bungee.api.event.PluginMessageEvent;
 import net.md_5.bungee.api.plugin.Listener;
@@ -50,7 +62,7 @@ public class PluginMessageListener implements Listener {
                         String sender = in.readUTF();
                         String world = in.readUTF();
                         String locLine = in.readUTF();
-                        TpposHandler.handle(sender, server, world, locLine);
+                        TpposHandler.handle(sender, server, world, locLine, "");
                         //String[] locData = locLine.split(";");
                         //connect to server
                         //Logger.getGlobal().info("found teleport data!");
@@ -78,6 +90,15 @@ public class PluginMessageListener implements Listener {
                         TitleHandler.handle(server,recipient, title, subtitle, intro, show, extro, delay);
                         break;
                     }
+                case Channel.WORLD_UUID:
+                {
+//Logger.getGlobal().info("world uuid!");
+
+                    String uuid = in.readUTF();
+                    String worldName = in.readUTF();
+                    MyWarpDBConnector.addWorldUUID(uuid, worldName);
+                    break;
+                }
                 default:
                     break;
             }

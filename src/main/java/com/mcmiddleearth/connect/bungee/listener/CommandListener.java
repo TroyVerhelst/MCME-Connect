@@ -1,7 +1,18 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (C) 2019 MCME
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package com.mcmiddleearth.connect.bungee.listener;
 
@@ -9,7 +20,9 @@ import com.mcmiddleearth.connect.Permission;
 import com.mcmiddleearth.connect.bungee.ConnectBungeePlugin;
 import com.mcmiddleearth.connect.bungee.Handler.TpHandler;
 import com.mcmiddleearth.connect.bungee.Handler.MvtpHandler;
+import com.mcmiddleearth.connect.bungee.warp.WarpHandler;
 import java.util.Collection;
+import java.util.logging.Logger;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -41,29 +54,53 @@ public class CommandListener implements Listener {
             if(message[0].equalsIgnoreCase("/tp") && message.length>1) {
 //Logger.getGlobal().info("/tp!");
                 if(player.hasPermission(Permission.TP)) {
-                    ProxiedPlayer destination = ProxyServer.getInstance().getPlayer(message[1]);
-                    if(destination != null 
-                            && !destination.getServer().getInfo().getName()
-                                .equals(player.getServer().getInfo().getName())) {
-                        if(player.hasPermission(Permission.WORLD+"."+destination.getServer()
-                                                                       .getInfo().getName())) {
-                            if(!TpHandler.handle(player.getName(), 
-                                     destination.getServer().getInfo().getName(),
-                                     destination.getName())) {
-                                sendError(player);
+                    if(message.length<3) {
+                        ProxiedPlayer destination = getPlayer(message[1]);
+                        if(destination != null 
+                                && !destination.getServer().getInfo().getName()
+                                    .equals(player.getServer().getInfo().getName())) {
+                            if(player.hasPermission(Permission.WORLD+"."+destination.getServer()
+                                                                           .getInfo().getName())) {
+                                if(!TpHandler.handle(player.getName(), 
+                                         destination.getServer().getInfo().getName(),
+                                         destination.getName())) {
+                                    sendError(player);
+                                }
+                            } else {
+                                player.sendMessage(new ComponentBuilder("You don't have permission to enter "
+                                                                          +destination.getName()+"'s world.")
+                                                        .color(ChatColor.RED).create());
                             }
-                        } else {
-                            player.sendMessage(new ComponentBuilder("You don't have permission to enter "
-                                                                      +destination+"'s world.")
-                                                    .color(ChatColor.RED).create());
+                            event.setCancelled(true);
                         }
-                        event.setCancelled(true);
+                    } else {
+                        if(player.hasPermission(Permission.TP_OTHER)) {
+                            ProxiedPlayer source = getPlayer(message[1]);
+                            ProxiedPlayer destination = getPlayer(message[2]);
+                            if(source !=null && destination != null 
+                                    && !source.getServer().getInfo().getName()
+                                        .equals(destination.getServer().getInfo().getName())) {
+                                if(source.hasPermission(Permission.WORLD+"."+destination.getServer()
+                                                                               .getInfo().getName())) {
+                                    if(!TpHandler.handle(source.getName(), 
+                                             destination.getServer().getInfo().getName(),
+                                             destination.getName())) {
+                                        sendError(player);
+                                    }
+                                } else {
+                                    player.sendMessage(new ComponentBuilder(source.getName()+" is not allowed to enter "
+                                                                              +destination.getName()+"'s world.")
+                                                            .color(ChatColor.RED).create());
+                                }
+                                event.setCancelled(true);
+                            }
+                        }
                     }
                 }
             } else if(message[0].equalsIgnoreCase("/tphere") && message.length>1) {
 //Logger.getGlobal().info("/tphere!");
                 if(player.hasPermission(Permission.TPHERE)) {
-                    ProxiedPlayer target = ProxyServer.getInstance().getPlayer(message[1]);
+                    ProxiedPlayer target = getPlayer(message[1]);
 //Logger.getGlobal().info("/tphere! 2");
                     if(target != null 
                             && !target.getServer().getInfo().getName()
@@ -135,6 +172,9 @@ public class CommandListener implements Listener {
                     }
                     event.setCancelled(true);
                 }
+            } else if(WarpHandler.isWarpCommand(message)) {
+//Logger.getGlobal().info("handle Warp");
+                event.setCancelled(WarpHandler.handle(player, message));
             }
         }
     }
@@ -174,6 +214,12 @@ public class CommandListener implements Listener {
     private void sendError(ProxiedPlayer player) {
         player.sendMessage(new ComponentBuilder("There was an error!")
                             .color(ChatColor.RED).create());    
+    }
+    
+    private ProxiedPlayer getPlayer(String name) {
+        return ProxyServer.getInstance().getPlayers().stream()
+                .filter(player -> player.getName().toLowerCase().startsWith(name.toLowerCase()))
+                .findFirst().orElse(null);
     }
     
 }

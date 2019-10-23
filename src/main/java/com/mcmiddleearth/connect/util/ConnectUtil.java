@@ -1,7 +1,18 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (C) 2019 MCME
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package com.mcmiddleearth.connect.util;
 
@@ -9,6 +20,7 @@ import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import com.mcmiddleearth.connect.Channel;
 import com.mcmiddleearth.connect.ConnectPlugin;
+import java.util.UUID;
 import java.util.logging.Logger;
 import lombok.NonNull;
 import org.bukkit.entity.Player;
@@ -60,6 +72,15 @@ Logger.getGlobal().info("teleport player "+player.getName()+" to server: "+serve
         out.writeInt(show);
         out.writeInt(extro);
         out.writeInt(delay);
+        sender.sendPluginMessage(ConnectPlugin.getInstance(), Channel.MAIN, out.toByteArray());
+    }
+
+    public static void sendWorldUUID(Player sender, UUID uid, String name) {
+Logger.getGlobal().info("Sending world uuid: "+uid.toString()+" "+name);
+        ByteArrayDataOutput out = ByteStreams.newDataOutput();
+        out.writeUTF(Channel.WORLD_UUID);
+        out.writeUTF(uid.toString());
+        out.writeUTF(name);
         sender.sendPluginMessage(ConnectPlugin.getInstance(), Channel.MAIN, out.toByteArray());
     }
 }

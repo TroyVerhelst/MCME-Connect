@@ -1,15 +1,30 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (C) 2019 MCME
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package com.mcmiddleearth.connect.bungee.listener;
 
+import com.google.common.io.ByteArrayDataOutput;
+import com.google.common.io.ByteStreams;
+import com.mcmiddleearth.connect.Channel;
+import com.mcmiddleearth.connect.Permission;
 import com.mcmiddleearth.connect.bungee.ConnectBungeePlugin;
-import com.mcmiddleearth.connect.bungee.Handler.VanishHandler;
-import de.myzelyam.api.vanish.BungeePlayerHideEvent;
-import de.myzelyam.api.vanish.BungeePlayerShowEvent;
+import com.mcmiddleearth.connect.bungee.vanish.VanishHandler;
+import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -26,86 +41,95 @@ import net.md_5.bungee.event.EventHandler;
  */
 public class ConnectionListener implements Listener {
 
-    //private Map<String,String> playerServers = new HashMap<>();
-    
     @EventHandler
     public void onJoin(PostLoginEvent event) {
-//Logger.getGlobal().info("onJoin");
         ProxyServer.getInstance().getScheduler().schedule(ConnectBungeePlugin.getInstance(), () -> {
             ProxiedPlayer player = event.getPlayer();
-//    Logger.getGlobal().info("connect "+VanishHandler.isPvSupport()+" "
-  //                                    +VanishHandler.isVanished(event.getPlayer())+" "
-    //                                  +event.getPlayer().hasPermission("pv.joinvanished"));
-            if(event.getPlayer().hasPermission("pv.joinvanished")) {
-                VanishHandler.vanish(player);
+            if(!VanishHandler.isPvSupport()) {
+                sendJoinMessage(player,false);
+            } else {
+                VanishHandler.join(player);
             }
-            if(!VanishHandler.isVanished(event.getPlayer())) {
-    //Logger.getGlobal().info("onJoin send");
-                sendJoinMessage(player);
-            }
-        }, ConnectBungeePlugin.getConnectDelay(), TimeUnit.MILLISECONDS);
-        /*Logger.getGlobal().info("server: "+event.getPlayer().getServer());
-        if(event.getPlayer().getServer()!=null) 
-            Logger.getGlobal().info(event.getPlayer().getServer().getInfo().getName());
-        Logger.getGlobal().info("reconnect: "+event.getPlayer().getReconnectServer());*/
-        //TODO: join messages
+        }, 5, TimeUnit.SECONDS);
     }
     
     @EventHandler
     public void onDisconnect(PlayerDisconnectEvent event) {
         ProxiedPlayer player = event.getPlayer();
-//Logger.getGlobal().info("disconnect "+pvSupport+" "+BungeeVanishAPI.isInvisible(player));
-        if(!VanishHandler.isVanished(player)) {
-            sendLeaveMessage(player);
+        if(!VanishHandler.isPvSupport()) {
+            sendLeaveMessage(player,false);
+        } else {
+            VanishHandler.quit(player);
         }
     }
     
     @EventHandler
-    public void onVanish(BungeePlayerHideEvent event) {
-//Logger.getGlobal().info("vanish "+event.getPlayer().getName());
-        VanishHandler.vanish(event.getPlayer());
-        sendLeaveMessage(event.getPlayer());
-    }
-    
-    @EventHandler
-    public void onVanish(BungeePlayerShowEvent event) {
-//Logger.getGlobal().info("unvanish "+event.getPlayer().getName());
-        VanishHandler.unvanish(event.getPlayer());
-        sendJoinMessage(event.getPlayer());
-    }
-    
-    @EventHandler
     public void handleLegacyPlayers(ServerConnectEvent event) {
-//Logger.getGlobal().info("target: "+event.getTarget()+" "+event.getReason());
-//Logger.getGlobal().info(""+ ConnectBungeePlugin.getLegacyPlayers().contains(event.getPlayer().getUniqueId()));
-//Logger.getGlobal().info(""+ ConnectBungeePlugin.getLegacyRedirectFrom()+" "+ConnectBungeePlugin.getLegacyRedirectTo()+" "+ConnectBungeePlugin.isLegacyRedirectEnabled());
         if(event.getReason().equals(ServerConnectEvent.Reason.JOIN_PROXY)) {
             if(!ConnectBungeePlugin.isLegacyRedirectEnabled()) {
                 return;
             }
-//Logger.getGlobal().info("1");
             if(ConnectBungeePlugin.getLegacyPlayers().contains(event.getPlayer().getUniqueId())
                     && event.getTarget().getName().equals(ConnectBungeePlugin.getLegacyRedirectFrom())) {
-//Logger.getGlobal().info("2");
                 event.setTarget(ProxyServer.getInstance().getServerInfo(ConnectBungeePlugin.getLegacyRedirectTo()));
             }
         }
     }
     
-    private void sendJoinMessage(ProxiedPlayer player) {
-        ProxyServer.getInstance().getPlayers().forEach(p -> {
-//Logger.getGlobal().info("onJoin send message");
+    public static void sendJoinMessage(ProxiedPlayer player, boolean fake) {
+        ProxyServer.getInstance().getPlayers().stream()
+                .filter(p -> !VanishHandler.isPvSupport() 
+                          || !fake 
+                          || !p.hasPermission(Permission.VANISH_SEE))
+                .forEach(p -> {
                 p.sendMessage(new ComponentBuilder(player.getName()+" joined the MCME-Network.")
                                             .color(ChatColor.YELLOW).create());
         });
+        Iterator<ProxiedPlayer> it = ProxyServer.getInstance().getPlayers().iterator();
+        if(it.hasNext()) {
+            ProxiedPlayer other = it.next();
+//Logger.getGlobal().info("send Discord join Message to: "+other);
+            if(other.getServer()==null) {
+                return;
+            }
+            ByteArrayDataOutput out = ByteStreams.newDataOutput();
+            out.writeUTF("Discord");
+            out.writeUTF(player.getName());
+            out.writeUTF("join");
+            other.getServer().getInfo().sendData(Channel.MAIN, out.toByteArray(),true);
+        }
     }
     
-    private void sendLeaveMessage(ProxiedPlayer player) {
-        ProxyServer.getInstance().getPlayers().forEach(p -> {
-//Logger.getGlobal().info("onJoin send message");
+    public static void sendLeaveMessage(ProxiedPlayer player, boolean fake) {
+        ProxyServer.getInstance().getPlayers().stream()
+                .filter(p -> !VanishHandler.isPvSupport() 
+                          || !fake 
+                          || !p.hasPermission(Permission.VANISH_SEE))
+                .forEach(p -> {
                 p.sendMessage(new ComponentBuilder(player.getName()+" left the MCME-Network.")
                                             .color(ChatColor.YELLOW).create());
         });
+        ProxiedPlayer other = getOtherPlayer(player); 
+//Logger.getGlobal().info("send Discord leave Message to: "+other);
+            if(other != null) {
+            ByteArrayDataOutput out = ByteStreams.newDataOutput();
+            out.writeUTF(Channel.DISCORD);
+            out.writeUTF(player.getName());
+            out.writeUTF("leave");
+            other.getServer().getInfo().sendData(Channel.MAIN, out.toByteArray(),false);
+        }
     }
+
+    private static ProxiedPlayer getOtherPlayer(ProxiedPlayer player) {
+        Iterator<ProxiedPlayer> iterator = ProxyServer.getInstance().getPlayers().iterator();
+        if(!iterator.hasNext()) return null;
+        ProxiedPlayer other = iterator.next();
+        if(other.equals(player)) {
+            if(!iterator.hasNext()) return null;
+            other = iterator.next();
+        }
+        return other;
+    }
+    
 
 }

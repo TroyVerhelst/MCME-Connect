@@ -1,7 +1,18 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (C) 2019 MCME
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package com.mcmiddleearth.connect.bungee.Handler;
 
@@ -20,7 +31,8 @@ import net.md_5.bungee.api.connection.ProxiedPlayer;
  */
 public class TpposHandler {
     
-    public static boolean handle(String sender, String server, String world, String location) {
+    public static boolean handle(String sender, String server, String world, 
+                                 String location, String message) {
         ProxiedPlayer player = ProxyServer.getInstance().getPlayer(sender);
         if(player!=null) {
             Callback<Boolean> callback = (connected, error) -> {
@@ -33,6 +45,9 @@ public class TpposHandler {
                         out.writeUTF(world);
                         out.writeUTF(location);
                         ProxyServer.getInstance().getServerInfo(server).sendData(Channel.MAIN, out.toByteArray());
+                        if(!message.equals("")) {
+                            ChatMessageHandler.handle(server, sender, message, 400);
+                        }
                     }, ConnectBungeePlugin.getConnectDelay(), TimeUnit.MILLISECONDS);
                     //Logger.getGlobal().info("sending teleport message!");
                 }
