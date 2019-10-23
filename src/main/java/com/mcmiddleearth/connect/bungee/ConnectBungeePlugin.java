@@ -1,7 +1,18 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (C) 2019 MCME
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package com.mcmiddleearth.connect.bungee;
 
@@ -15,6 +26,7 @@ import com.mcmiddleearth.connect.bungee.listener.PluginMessageListener;
 import com.mcmiddleearth.connect.bungee.listener.ConnectionListener;
 import com.mcmiddleearth.connect.bungee.listener.CommandListener;
 import com.mcmiddleearth.connect.bungee.vanish.VanishListener;
+import com.mcmiddleearth.connect.bungee.warp.MyWarpDBConnector;
 import com.mcmiddleearth.connect.bungee.watchdog.ServerWatchdog;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -58,7 +70,12 @@ public class ConnectBungeePlugin extends Plugin {
     
     @Getter
     private static Set<String> noMVTP = new HashSet<>();
-            
+          
+    @Getter
+    private static MyWarpDBConnector myWarpConnector;
+    
+    @Getter
+    private static boolean myWarpEnabled;
     @Override
     public void onEnable() {
         instance = this;
@@ -68,6 +85,10 @@ public class ConnectBungeePlugin extends Plugin {
         loadConfig();
         loadLegacyPlayers();
         VanishHandler.setPvSupport(config.getBoolean("premiumVanish", false));
+        myWarpEnabled = (Boolean) getConfig().getSection("myWarp").get("enabled");
+        if(myWarpEnabled) {
+            myWarpConnector = new MyWarpDBConnector(getConfig().getSection("myWarp"));
+        }
         if(VanishHandler.isPvSupport()) {
 Logger.getGlobal().info("enable vanish support ");
             VanishHandler.loadVanished();

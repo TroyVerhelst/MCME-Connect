@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Eriol_Eandur
+ * Copyright (C) 2019 MCME
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,6 +33,7 @@ public class Channel {
     public static final String TITLE    = "title";
     public static final String SPAWN    = "spawn";
     public static final String DISCORD  = "Discord";
+    public static final String WORLD_UUID  = "world_uuid";
     
 }
 

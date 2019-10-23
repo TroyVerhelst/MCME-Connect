@@ -1,7 +1,18 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (C) 2019 MCME
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package com.mcmiddleearth.connect.bungee.listener;
 
@@ -11,7 +22,6 @@ import com.mcmiddleearth.connect.Channel;
 import com.mcmiddleearth.connect.Permission;
 import com.mcmiddleearth.connect.bungee.ConnectBungeePlugin;
 import com.mcmiddleearth.connect.bungee.vanish.VanishHandler;
-import github.scarsz.discordsrv.dependencies.google.common.collect.Iterables;
 import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
@@ -75,9 +85,13 @@ public class ConnectionListener implements Listener {
                 p.sendMessage(new ComponentBuilder(player.getName()+" joined the MCME-Network.")
                                             .color(ChatColor.YELLOW).create());
         });
-        ProxiedPlayer other = ProxyServer.getInstance().getPlayers().iterator().next();
-Logger.getGlobal().info("send Discord join Message to: "+other);
-        if(other != null) {
+        Iterator<ProxiedPlayer> it = ProxyServer.getInstance().getPlayers().iterator();
+        if(it.hasNext()) {
+            ProxiedPlayer other = it.next();
+//Logger.getGlobal().info("send Discord join Message to: "+other);
+            if(other.getServer()==null) {
+                return;
+            }
             ByteArrayDataOutput out = ByteStreams.newDataOutput();
             out.writeUTF("Discord");
             out.writeUTF(player.getName());
@@ -96,7 +110,7 @@ Logger.getGlobal().info("send Discord join Message to: "+other);
                                             .color(ChatColor.YELLOW).create());
         });
         ProxiedPlayer other = getOtherPlayer(player); 
-Logger.getGlobal().info("send Discord leave Message to: "+other);
+//Logger.getGlobal().info("send Discord leave Message to: "+other);
             if(other != null) {
             ByteArrayDataOutput out = ByteStreams.newDataOutput();
             out.writeUTF(Channel.DISCORD);

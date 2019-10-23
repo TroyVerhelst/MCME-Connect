@@ -1,7 +1,18 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * Copyright (C) 2019 MCME
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package com.mcmiddleearth.connect.listener;
 
@@ -39,7 +50,7 @@ public class ConnectPluginListener implements PluginMessageListener {
 
     @Override
     public void onPluginMessageReceived(String channel, Player player, byte[] message) {
-Logger.getGlobal().info("Pugin Message! "+player);
+//Logger.getGlobal().info("Pugin Message! "+player);
         if (!channel.equals(Channel.MAIN)) {
           return;
         }
@@ -108,7 +119,7 @@ Logger.getGlobal().info("Pugin Message! "+player);
         } else if(subchannel.equals(Channel.DISCORD)) {
             String name = in.readUTF();
             String event = in.readUTF();
-Logger.getGlobal().info("Recieved discord message: "+name+" - "+event);
+//Logger.getGlobal().info("Recieved discord message: "+name+" - "+event);
             //TextChannel discordChannel = DiscordUtil.getTextChannelById("global");
             if(event.equals("join")) {
                 sendDiscord(":bangbang: **"+name+" joined the MCME-Network.**");

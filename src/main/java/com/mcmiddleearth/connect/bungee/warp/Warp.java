@@ -14,30 +14,37 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package com.mcmiddleearth.connect.bungee.vanish;
+package com.mcmiddleearth.connect.bungee.warp;
 
-import de.myzelyam.api.vanish.BungeePlayerHideEvent;
-import de.myzelyam.api.vanish.BungeePlayerShowEvent;
-import net.md_5.bungee.api.plugin.Listener;
-import net.md_5.bungee.event.EventHandler;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  *
  * @author Eriol_Eandur
  */
-public class VanishListener implements Listener {
+public class Warp {
     
-    @EventHandler
-    public void onVanish(BungeePlayerHideEvent event) {
-//Logger.getGlobal().info("vanish "+event.getPlayer().getName());
-        VanishHandler.vanish(event.getPlayer());
-    }
+    @Getter
+    @Setter
+    private String server;
     
-    @EventHandler
-    public void onVanish(BungeePlayerShowEvent event) {
-//Logger.getGlobal().info("unvanish "+event.getPlayer().getName());
-        VanishHandler.unvanish(event.getPlayer());
-    }
+    @Getter
+    @Setter
+    private String world;
+    
+    @Getter
+    @Setter
+    private String name;
+    
+    @Getter
+    @Setter
+    private String location;
+    
+    @Getter
+    @Setter
+    private String welcomeMessage;
+    
     
     
 }
