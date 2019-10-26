@@ -1,11 +1,22 @@
+#bungee
 legacyRedirect:
     enabled: true
     from: newplayer
     to: build
 disableMVTP:
 - newPlayer
+serverWatchdog: true
 connectDelay: 200
 premiumVanish: true
+myWarp:
+  enabled: true
+  user: mywarp
+  password: mywarp
+  dbName: mywarp
+  ip: localhost
+  port: 3306
+  
+#spigot
 themedbuildWorld: themedbuilds
 syncStatistic: true
 discordChannel: Global

@@ -33,7 +33,9 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.UUID;
@@ -79,7 +81,9 @@ public class ConnectBungeePlugin extends Plugin {
     @Override
     public void onEnable() {
         instance = this;
-        watcher = new ServerWatchdog();
+        if(config.getBoolean("serverWatchdog", true)) {
+            watcher = new ServerWatchdog();
+        }
         configFile = new File(getDataFolder(),"config.yml");
         saveDefaultConfig();
         loadConfig();
@@ -90,7 +94,7 @@ public class ConnectBungeePlugin extends Plugin {
             myWarpConnector = new MyWarpDBConnector(getConfig().getSection("myWarp"));
         }
         if(VanishHandler.isPvSupport()) {
-Logger.getGlobal().info("enable vanish support ");
+//Logger.getGlobal().info("enable vanish support ");
             VanishHandler.loadVanished();
             getProxy().getPluginManager().registerListener(this, new VanishListener());
         }
@@ -105,6 +109,10 @@ Logger.getGlobal().info("enable vanish support ");
     @Override
     public void onDisable() {
         watcher.stopWatchdog();
+    }
+    
+    public static boolean isMvtpDisabled(String server) {
+        return noMVTP.contains(server);
     }
     
     private void loadLegacyPlayers() {
