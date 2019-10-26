@@ -50,12 +50,12 @@ public class ConnectPluginListener implements PluginMessageListener {
 
     @Override
     public void onPluginMessageReceived(String channel, Player player, byte[] message) {
-//Logger.getGlobal().info("Pugin Message! "+player);
         if (!channel.equals(Channel.MAIN)) {
           return;
         }
         ByteArrayDataInput in = ByteStreams.newDataInput(message);
         String subchannel = in.readUTF();
+//Logger.getGlobal().info("Pugin Message! "+player+" channel "+subchannel);
         if (subchannel.equals(Channel.TPPOS)) {
             String playerData = in.readUTF();
             String worldData = in.readUTF();
@@ -98,6 +98,15 @@ public class ConnectPluginListener implements PluginMessageListener {
             }
             players.forEach(p -> {
                 p.sendTitle(title, subtitle, intro, show, extro);
+            });
+        } else if (subchannel.equals(Channel.COMMAND)) {
+//Logger.getGlobal().info("COMMAND");
+            String recipient = in.readUTF();
+            String command = in.readUTF();
+//Logger.getGlobal().info("recipient: "+recipient+ " "+command.substring(1));
+            runAfterArrival(recipient, source -> {
+//Logger.getGlobal().info("dispatch: "+source.getName()+" "+command);
+                Bukkit.dispatchCommand(source, command.substring(1));
             });
         } else if (subchannel.equals(Channel.SPAWN)) {
             String name = in.readUTF();

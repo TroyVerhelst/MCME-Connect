@@ -20,9 +20,9 @@ import com.mcmiddleearth.connect.Permission;
 import com.mcmiddleearth.connect.bungee.ConnectBungeePlugin;
 import com.mcmiddleearth.connect.bungee.Handler.TpHandler;
 import com.mcmiddleearth.connect.bungee.Handler.MvtpHandler;
+import com.mcmiddleearth.connect.bungee.Handler.ThemeHandler;
 import com.mcmiddleearth.connect.bungee.warp.WarpHandler;
 import java.util.Collection;
-import java.util.logging.Logger;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -60,7 +60,8 @@ public class CommandListener implements Listener {
                                 && !destination.getServer().getInfo().getName()
                                     .equals(player.getServer().getInfo().getName())) {
                             if(player.hasPermission(Permission.WORLD+"."+destination.getServer()
-                                                                           .getInfo().getName())) {
+                                                                           .getInfo().getName())
+                                    && isMvtpAllowed(player)) {
                                 if(!TpHandler.handle(player.getName(), 
                                          destination.getServer().getInfo().getName(),
                                          destination.getName())) {
@@ -81,7 +82,8 @@ public class CommandListener implements Listener {
                                     && !source.getServer().getInfo().getName()
                                         .equals(destination.getServer().getInfo().getName())) {
                                 if(source.hasPermission(Permission.WORLD+"."+destination.getServer()
-                                                                               .getInfo().getName())) {
+                                                                               .getInfo().getName())
+                                        && isMvtpAllowed(source)) {
                                     if(!TpHandler.handle(source.getName(), 
                                              destination.getServer().getInfo().getName(),
                                              destination.getName())) {
@@ -104,9 +106,10 @@ public class CommandListener implements Listener {
 //Logger.getGlobal().info("/tphere! 2");
                     if(target != null 
                             && !target.getServer().getInfo().getName()
-                                     .equals(player.getServer().getInfo().getName())) {
-                        if((target.hasPermission(Permission.WORLD+"."
-                                                   +player.getServer().getInfo().getName()))) {
+                                    .equals(player.getServer().getInfo().getName())) {
+                        if(target.hasPermission(Permission.WORLD+"."
+                                                   +player.getServer().getInfo().getName())
+                                && isMvtpAllowed(target)) {
                             if(!TpHandler.handle(target.getName(), 
                                                 player.getServer().getInfo().getName(),
                                                 player.getName())) {
@@ -124,19 +127,16 @@ public class CommandListener implements Listener {
                 String themedWorld = ConnectBungeePlugin.getConfig().getString("themedbuildWorld", "themedbuilds");
                 if(!player.getServer().getInfo().getName()
                         .equals(themedWorld)) {
-                    if(player.getServer().getInfo().getName()
-                                    .equals(ConnectBungeePlugin.getLegacyRedirectFrom())) {
+                    if(!isMvtpAllowed(player)) {
+//      wrong config key                              .equals(ConnectBungeePlugin.getLegacyRedirectFrom())) {
                         player.sendMessage(new ComponentBuilder(
-                                                "/theme isn't allowed to bypass the quiz.")
+                                                "/theme isn't allowed here.")
                                                 .color(ChatColor.RED).create());
                     } else {
                         if(player.hasPermission(Permission.WORLD+"."+themedWorld)) {
     //Logger.getGlobal().info("handle");
-                            if(!MvtpHandler.handle(player.getName(),themedWorld)) {
+                            if(!ThemeHandler.handle(player,themedWorld, event.getMessage())) {
                                 sendError(player);
-                            } else {
-                                player.sendMessage(new ComponentBuilder("All Themed-build commands need to be issues from Themed-build world. You were teleported there.")
-                                                        .color(ChatColor.RED).create());
                             }
                         } else {
                             player.sendMessage(new ComponentBuilder("You don't have permission to enter world '"
@@ -153,10 +153,10 @@ public class CommandListener implements Listener {
 //Logger.getGlobal().info("/mvtp");
                 String target = message[1];
                 if(!player.getServer().getInfo().getName().equals(target)) {
-                    if(player.getServer().getInfo().getName()
-                                    .equals(ConnectBungeePlugin.getLegacyRedirectFrom())) {
+                    if(!isMvtpAllowed(player)) {
+//   wrong config key                                 .equals(ConnectBungeePlugin.getLegacyRedirectFrom())) {
                         player.sendMessage(new ComponentBuilder(
-                                                "/mvtp isn't allowed to bypass the quiz.")
+                                                "/mvtp isn't allowed here.")
                                                 .color(ChatColor.RED).create());
                     } else {
                         if(player.hasPermission(Permission.WORLD+"."+target)) {
@@ -174,10 +174,25 @@ public class CommandListener implements Listener {
                 }
             } else if(WarpHandler.isWarpCommand(message)) {
 //Logger.getGlobal().info("handle Warp");
-                event.setCancelled(WarpHandler.handle(player, message));
+                if(!isMvtpAllowed(player)) {
+//   wrong config key                                 .equals(ConnectBungeePlugin.getLegacyRedirectFrom())) {
+                    player.sendMessage(new ComponentBuilder(
+                                            "/warp isn't allowed here.")
+                                            .color(ChatColor.RED).create());
+                    event.setCancelled(true);
+                } else {
+                    event.setCancelled(WarpHandler.handle(player, message));
+                }
             }
         }
     }
+    
+    private boolean isMvtpAllowed(ProxiedPlayer player) {
+        boolean result = player.hasPermission(Permission.IGNORE_DISABLED_MVTP)
+            || !ConnectBungeePlugin.isMvtpDisabled(player.getServer().getInfo().getName());
+        return result;
+    }
+    
     
     @EventHandler
     public void onTabComplete(TabCompleteEvent event) {

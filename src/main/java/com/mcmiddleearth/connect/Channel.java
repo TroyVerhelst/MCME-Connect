@@ -31,6 +31,7 @@ public class Channel {
     public static final String TP       = "tp";
     public static final String MESSAGE  = "message";
     public static final String TITLE    = "title";
+    public static final String COMMAND    = "command";
     public static final String SPAWN    = "spawn";
     public static final String DISCORD  = "Discord";
     public static final String WORLD_UUID  = "world_uuid";
