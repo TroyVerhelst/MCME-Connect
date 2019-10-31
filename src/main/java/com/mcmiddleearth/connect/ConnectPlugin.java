@@ -41,6 +41,7 @@ public class ConnectPlugin extends JavaPlugin {
     private static String discordChannel;
     
     private BukkitTask statisticUpdater;
+    
     @Override
     public void onEnable() {
         instance = this;
@@ -62,6 +63,9 @@ public class ConnectPlugin extends JavaPlugin {
     
     @Override
     public void onDisable() {
+        Bukkit.getOnlinePlayers().forEach(player-> {
+            ConnectPlugin.getStatisticStorage().saveStatisticSync(player);
+        });
         //statisticUpdater.cancel();
         //if(statisticStorage != null) 
             //statisticStorage.disconnect();

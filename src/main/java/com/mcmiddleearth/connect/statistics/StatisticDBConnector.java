@@ -71,9 +71,6 @@ public class StatisticDBConnector {
     private PreparedStatement selectPlayerId;
     
     
-    @Getter
-    private boolean connected = false;
-    
     private ExecutorService executor = Executors.newSingleThreadExecutor();
     
     public StatisticDBConnector(ConfigurationSection config) {
@@ -86,28 +83,28 @@ public class StatisticDBConnector {
         dbIp = config.getString("ip", "localhost");
         port = config.getInt("port",3306);
         dataBase = new MySQLDataSource(dbIp,port,dbName);
-        executeAsync( player -> {
-            connect();
-            checkConnection();
-        }, null);
+        connect();
+        checkConnection();
     }
     
     private void executeAsync(Consumer<Player> method, Player player) {
         new BukkitRunnable() {
             @Override
             public void run() {
+                if(!checkConnection()) {
+                    connect();
+                }
                 method.accept(player);
             }
         }.runTaskAsynchronously(ConnectPlugin.getInstance());
     }
     
-    private boolean checkConnection() {
+    private synchronized boolean checkConnection() {
         try {
-            if(connected && dbConnection.isValid(5)) {
-                connected = true;
+            if(true || dbConnection.isValid(5)) {
                 return true;
             } else {
-                throw new SQLException();
+                throw new SQLException("No connection to statistic database!");
             }
         } catch (SQLException ex) {
             Logger.getLogger(StatisticDBConnector.class.getName()).log(Level.SEVERE, null, ex);
@@ -115,7 +112,7 @@ public class StatisticDBConnector {
         }
     }
     
-    private void connect() {
+    private synchronized void connect() {
         try {
             dbConnection = dataBase.getConnection(dbUser, dbPassword);
             
@@ -195,15 +192,13 @@ public class StatisticDBConnector {
             selectPlayerId = dbConnection
                     .prepareStatement("SELECT id FROM mcmeconnect_statistic WHERE uuid = ?");
             selectPlayerId.setFetchSize(1);
-            
-            connected = true;
         } catch (SQLException ex) {
             Logger.getLogger(StatisticDBConnector.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     
-    public void disconnect() {
-        if(connected && dbConnection!=null) {
+    public synchronized void disconnect() {
+        if(dbConnection!=null) {
             try {
                 dbConnection.close();
             } catch (SQLException ex) {
@@ -212,104 +207,107 @@ public class StatisticDBConnector {
         }
     }
     
+    private synchronized void checkTablesSync(){
+        try {
+            Logger.getLogger(ConnectPlugin.class.getName()).info("checking tables...");
+            String statement = "CREATE TABLE IF NOT EXISTS mcmeconnect_statistic (uuid VARCHAR(50), id INT AUTO_INCREMENT";
+            for(Statistic stat : Statistic.values()) {
+                if(stat.getType().equals(Statistic.Type.UNTYPED)) {
+                    statement = statement + ", " + stat.name()+" INT";
+                }
+            }
+            statement = statement + ", KEY(id))";
+            dbConnection.createStatement().execute(statement);
+            PreparedStatement checkColumns = dbConnection.prepareStatement("SELECT * FROM mcmeconnect_statistic");
+            checkColumns.setFetchSize(1);
+            ResultSet result = checkColumns.executeQuery();
+            if(result.next()) {
+                for(Statistic stat: Statistic.values()) {
+                    if(stat.getType().equals(Statistic.Type.UNTYPED)) {
+                        try {
+                            //Logger.getLogger(ConnectPlugin.class.getName()).info("checking... "+stat.name());
+                            result.findColumn(stat.name());
+                        } catch(SQLException ex) {
+                            Logger.getLogger(ConnectPlugin.class.getName()).info("add column "+stat.name());
+                            statement = "ALTER TABLE mcmeconnect_statistic ADD COLUMN "
+                                    + stat.name()+" INT";
+                            dbConnection.createStatement().execute(statement);
+                        }
+                    }
+                }
+            }
+
+            statement = "CREATE TABLE IF NOT EXISTS mcmeconnect_statistic_material (id INT, material VARCHAR(50)";
+            for(Statistic stat : Statistic.values()) {
+                switch(stat.getType()) {
+                    case BLOCK:
+                    case ITEM:
+                        statement = statement + ", " + getName(stat)+" INT";
+                        break;
+                }
+            }
+            statement = statement + ")";
+            dbConnection.createStatement().execute(statement);
+            checkColumns = dbConnection.prepareStatement("SELECT * FROM mcmeconnect_statistic_material");
+            checkColumns.setFetchSize(1);
+            result = checkColumns.executeQuery();
+            if(result.next()) {
+                for(Statistic stat: Statistic.values()) {
+                    if(stat.getType().equals(Statistic.Type.BLOCK)
+                            || stat.getType().equals(Statistic.Type.ITEM)) {
+                        try {
+                            //Logger.getLogger(ConnectPlugin.class.getName()).info("material checking... "+stat.name());
+                            result.findColumn(getName(stat));
+                        } catch(SQLException ex) {
+                            Logger.getLogger(ConnectPlugin.class.getName()).info("add column "+stat.name());
+                            statement = "ALTER TABLE mcmeconnect_statistic_material ADD COLUMN "
+                                    + getName(stat)+" INT";
+                            dbConnection.createStatement().execute(statement);
+                        }
+                    }
+                }
+            }
+
+            statement = "CREATE TABLE IF NOT EXISTS mcmeconnect_statistic_entity (id INT, entity VARCHAR(50)";
+            for(Statistic stat : Statistic.values()) {
+                switch(stat.getType()) {
+                    case ENTITY:
+                        statement = statement + ", " + stat.name()+" INT";
+                        break;
+                }
+            }
+            statement = statement + ")";
+            dbConnection.createStatement().execute(statement);
+            checkColumns = dbConnection.prepareStatement("SELECT * FROM mcmeconnect_statistic_entity");
+            checkColumns.setFetchSize(1);
+            result = checkColumns.executeQuery();
+            if(result.next()) {
+                for(Statistic stat: Statistic.values()) {
+                    if(stat.getType().equals(Statistic.Type.ENTITY)) {
+                        try {
+                            //Logger.getLogger(ConnectPlugin.class.getName()).info("entity checking... "+stat.name());
+                            result.findColumn(stat.name());
+                        } catch(SQLException ex) {
+                            Logger.getLogger(ConnectPlugin.class.getName()).info("add column "+stat.name());
+                            statement = "ALTER TABLE mcmeconnect_statistic_entity ADD COLUMN "
+                                    + stat.name()+" INT";
+                            dbConnection.createStatement().execute(statement);
+                        }
+                    }
+                }
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(StatisticDBConnector.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
     private void checkTables(){
         executeAsync(player -> {
-            try {
-                Logger.getLogger(ConnectPlugin.class.getName()).info("checking tables...");
-                String statement = "CREATE TABLE IF NOT EXISTS mcmeconnect_statistic (uuid VARCHAR(50), id INT AUTO_INCREMENT";
-                for(Statistic stat : Statistic.values()) {
-                    if(stat.getType().equals(Statistic.Type.UNTYPED)) {
-                        statement = statement + ", " + stat.name()+" INT";
-                    }
-                }
-                statement = statement + ", KEY(id))";
-                dbConnection.createStatement().execute(statement);
-                PreparedStatement checkColumns = dbConnection.prepareStatement("SELECT * FROM mcmeconnect_statistic");
-                checkColumns.setFetchSize(1);
-                ResultSet result = checkColumns.executeQuery();
-                if(result.next()) {
-                    for(Statistic stat: Statistic.values()) {
-                        if(stat.getType().equals(Statistic.Type.UNTYPED)) {
-                            try {
-                                //Logger.getLogger(ConnectPlugin.class.getName()).info("checking... "+stat.name());
-                                result.findColumn(stat.name());
-                            } catch(SQLException ex) {
-                                Logger.getLogger(ConnectPlugin.class.getName()).info("add column "+stat.name());
-                                statement = "ALTER TABLE mcmeconnect_statistic ADD COLUMN "
-                                        + stat.name()+" INT";
-                                dbConnection.createStatement().execute(statement);
-                            }
-                        }
-                    }
-                }
-
-                statement = "CREATE TABLE IF NOT EXISTS mcmeconnect_statistic_material (id INT, material VARCHAR(50)";
-                for(Statistic stat : Statistic.values()) {
-                    switch(stat.getType()) {
-                        case BLOCK:
-                        case ITEM:
-                            statement = statement + ", " + getName(stat)+" INT";
-                            break;
-                    }
-                }
-                statement = statement + ")";
-                dbConnection.createStatement().execute(statement);
-                checkColumns = dbConnection.prepareStatement("SELECT * FROM mcmeconnect_statistic_material");
-                checkColumns.setFetchSize(1);
-                result = checkColumns.executeQuery();
-                if(result.next()) {
-                    for(Statistic stat: Statistic.values()) {
-                        if(stat.getType().equals(Statistic.Type.BLOCK)
-                                || stat.getType().equals(Statistic.Type.ITEM)) {
-                            try {
-                                //Logger.getLogger(ConnectPlugin.class.getName()).info("material checking... "+stat.name());
-                                result.findColumn(getName(stat));
-                            } catch(SQLException ex) {
-                                Logger.getLogger(ConnectPlugin.class.getName()).info("add column "+stat.name());
-                                statement = "ALTER TABLE mcmeconnect_statistic_material ADD COLUMN "
-                                        + getName(stat)+" INT";
-                                dbConnection.createStatement().execute(statement);
-                            }
-                        }
-                    }
-                }
-
-                statement = "CREATE TABLE IF NOT EXISTS mcmeconnect_statistic_entity (id INT, entity VARCHAR(50)";
-                for(Statistic stat : Statistic.values()) {
-                    switch(stat.getType()) {
-                        case ENTITY:
-                            statement = statement + ", " + stat.name()+" INT";
-                            break;
-                    }
-                }
-                statement = statement + ")";
-                dbConnection.createStatement().execute(statement);
-                checkColumns = dbConnection.prepareStatement("SELECT * FROM mcmeconnect_statistic_entity");
-                checkColumns.setFetchSize(1);
-                result = checkColumns.executeQuery();
-                if(result.next()) {
-                    for(Statistic stat: Statistic.values()) {
-                        if(stat.getType().equals(Statistic.Type.ENTITY)) {
-                            try {
-                                //Logger.getLogger(ConnectPlugin.class.getName()).info("entity checking... "+stat.name());
-                                result.findColumn(stat.name());
-                            } catch(SQLException ex) {
-                                Logger.getLogger(ConnectPlugin.class.getName()).info("add column "+stat.name());
-                                statement = "ALTER TABLE mcmeconnect_statistic_entity ADD COLUMN "
-                                        + stat.name()+" INT";
-                                dbConnection.createStatement().execute(statement);
-                            }
-                        }
-                    }
-                }
-            } catch (SQLException ex) {
-                Logger.getLogger(StatisticDBConnector.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            checkTablesSync();
         },null);
     }
     
-    public void loadStatistic(Player p) {
-        executeAsync(player -> {
+    private synchronized void loadStatisticSync(Player player) {
             try {
 //Logger.getLogger(ConnectPlugin.class.getName()).info("load Statistic for "+player.getName());
                 selectPlayerStats.setString(1, player.getUniqueId().toString());
@@ -332,6 +330,7 @@ public class StatisticDBConnector {
                     }.runTask(ConnectPlugin.getInstance());
                 }
                 int id = getPlayerId(player.getUniqueId());
+Logger.getGlobal().warning("Load Statistic for: "+player.getName()+ " "+player.getUniqueId()+" stats id: "+id);
                 if(id>=0) {
                     selectPlayerAllMatStats.setInt(1, id);
                     ResultSet matResult = selectPlayerAllMatStats.executeQuery();
@@ -391,29 +390,40 @@ public class StatisticDBConnector {
             } catch (SQLException ex) {
                 Logger.getLogger(StatisticDBConnector.class.getName()).log(Level.SEVERE, null, ex);
             }
+    }
+    
+    public void loadStatistic(Player p) {
+        executeAsync(player -> {
+            loadStatisticSync(player);
         }, p);
+    }
+    
+    public synchronized void saveStatisticSync(Player player) {
+        try {
+//Logger.getLogger(StatisticDBConnector.class.getName()).info("save Statistic for "+player.getName());
+            selectPlayerStats.setString(1, player.getUniqueId().toString());
+            ResultSet result = selectPlayerStats.executeQuery();
+            if(result.next()) {
+//Logger.getLogger(StatisticDBConnector.class.getName()).info("update");
+                updateStats(player);
+            } else {
+//Logger.getLogger(StatisticDBConnector.class.getName()).info("insert");
+                insertStats(player);
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(StatisticDBConnector.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
     
     public void saveStatistic(Player p) {
         executeAsync(player -> {
-            try {
-//Logger.getLogger(StatisticDBConnector.class.getName()).info("save Statistic for "+player.getName());
-                ResultSet result = selectPlayerStats.executeQuery();
-                if(result.next()) {
-//Logger.getLogger(StatisticDBConnector.class.getName()).info("update");
-                    updateStats(player);
-                } else {
-//Logger.getLogger(StatisticDBConnector.class.getName()).info("insert");
-                    insertStats(player);
-                }
-            } catch (SQLException ex) {
-                Logger.getLogger(StatisticDBConnector.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            saveStatisticSync(player);
         },p);
     }
 
-    private void updateStats(Player player) throws SQLException {
+    private synchronized void updateStats(Player player) throws SQLException {
         int i = 1;
+Logger.getGlobal().warning("update Statistic for: "+player.getName()+ " "+player.getUniqueId());
         for(Statistic stat : Statistic.values()) {
             if(stat.getType().equals(Statistic.Type.UNTYPED)) {
                 updatePlayerStats.setInt(i, player.getStatistic(stat));
@@ -424,7 +434,8 @@ public class StatisticDBConnector {
         updatePlayerStats.executeUpdate();
     }
     
-    private void insertStats(Player player) throws SQLException {
+    private synchronized void insertStats(Player player) throws SQLException {
+Logger.getGlobal().warning("update Statistic for: "+player.getName()+ " "+player.getUniqueId());
         insertPlayerStats.setString(1, player.getUniqueId().toString());
         int i = 2;
         for(Statistic stat : Statistic.values()) {
@@ -436,83 +447,96 @@ public class StatisticDBConnector {
         insertPlayerStats.executeUpdate();
     }
     
+    private synchronized void saveMaterialStatsSync(Player player, Statistic stat, 
+                                      Material mat, int value) {
+        try {
+//Logger.getLogger(StatisticDBConnector.class.getName()).info("save Statistic for "+player.getName());
+            int id = getPlayerId(player.getUniqueId());
+Logger.getGlobal().warning("Save mat Statistic for: "+player.getName()+ " "+player.getUniqueId()+" stats id: "+id);
+            if(id>=0) {
+                selectPlayerMatStats.setInt(1, id);
+                selectPlayerMatStats.setString(2, mat.name());
+                ResultSet result = selectPlayerMatStats.executeQuery();
+                if(result.next()) {
+//Logger.getLogger(StatisticDBConnector.class.getName()).info("update");
+                    updateMatStat(id, stat, mat, value);
+                } else {
+//Logger.getLogger(StatisticDBConnector.class.getName()).info("insert");
+                    insertMatStat(id, stat, mat, value);
+                }
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(StatisticDBConnector.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
     public void saveMaterialStats(Player p, Statistic stat, 
                                       Material mat, int value) {
         executeAsync(player -> {
-            try {
-//Logger.getLogger(StatisticDBConnector.class.getName()).info("save Statistic for "+player.getName());
-                int id = getPlayerId(player.getUniqueId());
-                if(id>=0) {
-                    selectPlayerMatStats.setInt(1, id);
-                    selectPlayerMatStats.setString(2, mat.name());
-                    ResultSet result = selectPlayerMatStats.executeQuery();
-                    if(result.next()) {
-    //Logger.getLogger(StatisticDBConnector.class.getName()).info("update");
-                        updateMatStat(id, stat, mat, value);
-                    } else {
-    //Logger.getLogger(StatisticDBConnector.class.getName()).info("insert");
-                        insertMatStat(id, stat, mat, value);
-                    }
-                }
-            } catch (SQLException ex) {
-                Logger.getLogger(StatisticDBConnector.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            saveMaterialStatsSync(player,stat,mat,value);
         },p);
     }
     
-    private void updateMatStat(int id, Statistic stat, Material mat, int value) throws SQLException {
+    private synchronized void updateMatStat(int id, Statistic stat, Material mat, int value) throws SQLException {
         String statement = "UPDATE mcmeconnect_statistic_material SET "+getName(stat)
                 +" = " + value + " WHERE id = "+id+" AND material = '"+mat.name()+"'";
         dbConnection.createStatement().execute(statement);
     }
     
-    private void insertMatStat(int id, Statistic stat, Material mat, int value) throws SQLException {
+    private synchronized void insertMatStat(int id, Statistic stat, Material mat, int value) throws SQLException {
         String statement = "INSERT INTO mcmeconnect_statistic_material (id, material, "+getName(stat)
                 +") VALUES (" + id + ", '"+ mat.name()+"', "+ value + ")";
-Logger.getGlobal().info("insertMatStat "+statement);
+//Logger.getGlobal().info("insertMatStat "+statement);
         dbConnection.createStatement().execute(statement);
+    }
+    
+    private synchronized void saveEntityStatsSync(Player player, Statistic stat,
+                                      EntityType entity, int value) {
+        try {
+//Logger.getLogger(StatisticDBConnector.class.getName()).info("save Statistic for "+player.getName());
+            int id = getPlayerId(player.getUniqueId());
+Logger.getGlobal().warning("Save entity Statistic for: "+player.getName()+ " "+player.getUniqueId()+" stats id: "+id);
+            if(id>=0) {
+                selectPlayerEntityStats.setInt(1, id);
+                selectPlayerEntityStats.setString(2, entity.name());
+                ResultSet result = selectPlayerEntityStats.executeQuery();
+                if(result.next()) {
+//Logger.getLogger(StatisticDBConnector.class.getName()).info("update");
+                    updateEntityStat(id, stat, entity, value);
+                } else {
+//Logger.getLogger(StatisticDBConnector.class.getName()).info("insert");
+                    insertEntityStat(id, stat, entity, value);
+                }
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(StatisticDBConnector.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
     
     public void saveEntityStats(Player p, Statistic stat, 
                                       EntityType entity, int value) {
         executeAsync(player -> {
-            try {
-//Logger.getLogger(StatisticDBConnector.class.getName()).info("save Statistic for "+player.getName());
-                int id = getPlayerId(player.getUniqueId());
-                if(id>=0) {
-                    selectPlayerEntityStats.setInt(1, id);
-                    selectPlayerEntityStats.setString(2, entity.name());
-                    ResultSet result = selectPlayerEntityStats.executeQuery();
-                    if(result.next()) {
-    //Logger.getLogger(StatisticDBConnector.class.getName()).info("update");
-                        updateEntityStat(id, stat, entity, value);
-                    } else {
-    //Logger.getLogger(StatisticDBConnector.class.getName()).info("insert");
-                        insertEntityStat(id, stat, entity, value);
-                    }
-                }
-            } catch (SQLException ex) {
-                Logger.getLogger(StatisticDBConnector.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            saveEntityStatsSync(player,stat,entity,value);
         },p);
     }
     
-    private void updateEntityStat(int id, Statistic stat, EntityType entity, int value) throws SQLException {
+    private synchronized void updateEntityStat(int id, Statistic stat, EntityType entity, int value) throws SQLException {
         String statement = "UPDATE mcmeconnect_statistic_entity SET "+stat.name()
                 +" = " + value + " WHERE id = "+id+" AND entity = '"+entity.name()+"'";
         dbConnection.createStatement().execute(statement);
     }
     
-    private void insertEntityStat(int id, Statistic stat, EntityType entity, int value) throws SQLException {
+    private synchronized void insertEntityStat(int id, Statistic stat, EntityType entity, int value) throws SQLException {
         String statement = "INSERT INTO mcmeconnect_statistic_entity (id, entity, "+stat.name()
                 +") VALUES (" + id + ", '"+ entity.name()+"', "+ value + ")";
         dbConnection.createStatement().execute(statement);
     }
     
-    private int getPlayerId(UUID uuid) throws SQLException {
+    private synchronized int getPlayerId(UUID uuid) throws SQLException {
         selectPlayerId.setString(1, uuid.toString());
         ResultSet result = selectPlayerId.executeQuery();
         if(result.next()) {
+Logger.getGlobal().warning("Get id for: "+uuid.toString()+" stats id: "+result.getInt("id"));
             return result.getInt("id");
         } else {
             return -1;
