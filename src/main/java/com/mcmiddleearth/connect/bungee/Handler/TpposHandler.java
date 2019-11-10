@@ -53,7 +53,7 @@ public class TpposHandler {
                 }
             };
             if(!player.getServer().getInfo().getName().equals(server)) {
-                ConnectHandler.handle(sender, server, callback);
+                ConnectHandler.handle(sender, server, true, callback);
             } else {
                 callback.done(Boolean.TRUE, null);
             }

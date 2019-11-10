@@ -16,31 +16,29 @@
  */
 package com.mcmiddleearth.connect.bungee.Handler;
 
+import com.google.common.io.ByteArrayDataOutput;
+import com.google.common.io.ByteStreams;
+import com.mcmiddleearth.connect.Channel;
 import com.mcmiddleearth.connect.bungee.ConnectBungeePlugin;
-import net.md_5.bungee.api.Callback;
-import net.md_5.bungee.api.ChatColor;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
-import net.md_5.bungee.api.connection.Server;
 
 /**
  *
  * @author Eriol_Eandur
  */
-public class ConnectHandler {
+public class LegacyPlayerHandler {
     
-    public static boolean handle(String sender, String server, boolean welcomeMsg, Callback<Boolean> callback) {
-        ProxiedPlayer source = ProxyServer.getInstance().getPlayer(sender);
-        Server origin = source.getServer();
-        if(!origin.getInfo().getName().equals(server)) {
-//Logger.getGlobal().info("onChat connect to other server");
-            if(welcomeMsg) {
-                ChatMessageHandler.handle(server, sender, ChatColor.YELLOW+"Welcome to '"+server+"'!", 
-                                          ConnectBungeePlugin.getConnectDelay());
-            }
-            source.connect(ProxyServer.getInstance().getServerInfo(server),callback);
-            return true;
-        }
-        return false;
+    public static void handle(ProxiedPlayer player, String server, String target) {
+        ProxyServer.getInstance().getScheduler().schedule(ConnectBungeePlugin.getInstance(), () -> {
+            ByteArrayDataOutput out = ByteStreams.newDataOutput();
+            out.writeUTF(Channel.LEGACY);
+            out.writeUTF(player.getName());
+            out.writeUTF(target);
+// Logger.getGlobal().info("sent LEGACY message: "+server+" - "+ player.getName()+" - "+target);
+           ProxyServer.getInstance().getServerInfo(server).sendData(Channel.MAIN, out.toByteArray(),true);   
+        }, ConnectBungeePlugin.getConnectDelay(), TimeUnit.MILLISECONDS);
     }
 }

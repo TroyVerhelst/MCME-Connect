@@ -48,7 +48,7 @@ public class MvtpHandler {
                 }, ConnectBungeePlugin.getConnectDelay(), TimeUnit.MILLISECONDS);
             }
         };
-        return (ConnectHandler.handle(sender, server, callback)); //if {
+        return (ConnectHandler.handle(sender, server, true, callback)); //if {
             /*ServerInfo dest = ProxyServer.getInstance().getServerInfo(server);
             ProxyServer.getInstance().getScheduler().schedule(ConnectBungeePlugin.getInstance(), () -> {
 Logger.getGlobal().info("onChat tp to player");

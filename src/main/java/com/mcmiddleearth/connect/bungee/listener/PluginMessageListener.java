@@ -51,7 +51,7 @@ public class PluginMessageListener implements Listener {
                     {
                         String server = in.readUTF();
                         String sender = in.readUTF();
-                        ConnectHandler.handle(sender,server, (connected, error) -> {});
+                        ConnectHandler.handle(sender,server, true, (connected, error) -> {});
                         //tp to spawn
                         break;
                     }

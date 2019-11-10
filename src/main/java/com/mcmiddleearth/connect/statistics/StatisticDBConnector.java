@@ -27,7 +27,6 @@ import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import lombok.Getter;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.MemoryConfiguration;
 import org.bukkit.entity.Player;
@@ -36,7 +35,6 @@ import org.bukkit.Statistic;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.Bukkit;
 
 /**
  *
@@ -330,7 +328,7 @@ public class StatisticDBConnector {
                     }.runTask(ConnectPlugin.getInstance());
                 }
                 int id = getPlayerId(player.getUniqueId());
-Logger.getGlobal().warning("Load Statistic for: "+player.getName()+ " "+player.getUniqueId()+" stats id: "+id);
+//Logger.getGlobal().warning("Load Statistic for: "+player.getName()+ " "+player.getUniqueId()+" stats id: "+id);
                 if(id>=0) {
                     selectPlayerAllMatStats.setInt(1, id);
                     ResultSet matResult = selectPlayerAllMatStats.executeQuery();
@@ -398,6 +396,18 @@ Logger.getGlobal().warning("Load Statistic for: "+player.getName()+ " "+player.g
         }, p);
     }
     
+    public void loadStaticstic(Player p, Consumer<Player> callback) {
+        executeAsync(player -> {
+            loadStatisticSync(player);
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    callback.accept(player);
+                }
+            }.runTask(ConnectPlugin.getInstance());
+        },p);
+    }
+    
     public synchronized void saveStatisticSync(Player player) {
         try {
 //Logger.getLogger(StatisticDBConnector.class.getName()).info("save Statistic for "+player.getName());
@@ -421,9 +431,21 @@ Logger.getGlobal().warning("Load Statistic for: "+player.getName()+ " "+player.g
         },p);
     }
 
+    public void saveStaticstic(Player p, Consumer<Player> callback) {
+        executeAsync(player -> {
+            saveStatisticSync(player);
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    callback.accept(player);
+                }
+            }.runTask(ConnectPlugin.getInstance());
+        },p);
+    }
+    
     private synchronized void updateStats(Player player) throws SQLException {
         int i = 1;
-Logger.getGlobal().warning("update Statistic for: "+player.getName()+ " "+player.getUniqueId());
+//Logger.getGlobal().warning("update Statistic for: "+player.getName()+ " "+player.getUniqueId());
         for(Statistic stat : Statistic.values()) {
             if(stat.getType().equals(Statistic.Type.UNTYPED)) {
                 updatePlayerStats.setInt(i, player.getStatistic(stat));
@@ -435,7 +457,7 @@ Logger.getGlobal().warning("update Statistic for: "+player.getName()+ " "+player
     }
     
     private synchronized void insertStats(Player player) throws SQLException {
-Logger.getGlobal().warning("update Statistic for: "+player.getName()+ " "+player.getUniqueId());
+//Logger.getGlobal().warning("update Statistic for: "+player.getName()+ " "+player.getUniqueId());
         insertPlayerStats.setString(1, player.getUniqueId().toString());
         int i = 2;
         for(Statistic stat : Statistic.values()) {
@@ -452,7 +474,7 @@ Logger.getGlobal().warning("update Statistic for: "+player.getName()+ " "+player
         try {
 //Logger.getLogger(StatisticDBConnector.class.getName()).info("save Statistic for "+player.getName());
             int id = getPlayerId(player.getUniqueId());
-Logger.getGlobal().warning("Save mat Statistic for: "+player.getName()+ " "+player.getUniqueId()+" stats id: "+id);
+//Logger.getGlobal().warning("Save mat Statistic for: "+player.getName()+ " "+player.getUniqueId()+" stats id: "+id);
             if(id>=0) {
                 selectPlayerMatStats.setInt(1, id);
                 selectPlayerMatStats.setString(2, mat.name());
@@ -495,7 +517,7 @@ Logger.getGlobal().warning("Save mat Statistic for: "+player.getName()+ " "+play
         try {
 //Logger.getLogger(StatisticDBConnector.class.getName()).info("save Statistic for "+player.getName());
             int id = getPlayerId(player.getUniqueId());
-Logger.getGlobal().warning("Save entity Statistic for: "+player.getName()+ " "+player.getUniqueId()+" stats id: "+id);
+//Logger.getGlobal().warning("Save entity Statistic for: "+player.getName()+ " "+player.getUniqueId()+" stats id: "+id);
             if(id>=0) {
                 selectPlayerEntityStats.setInt(1, id);
                 selectPlayerEntityStats.setString(2, entity.name());
@@ -536,7 +558,7 @@ Logger.getGlobal().warning("Save entity Statistic for: "+player.getName()+ " "+p
         selectPlayerId.setString(1, uuid.toString());
         ResultSet result = selectPlayerId.executeQuery();
         if(result.next()) {
-Logger.getGlobal().warning("Get id for: "+uuid.toString()+" stats id: "+result.getInt("id"));
+//Logger.getGlobal().warning("Get id for: "+uuid.toString()+" stats id: "+result.getInt("id"));
             return result.getInt("id");
         } else {
             return -1;

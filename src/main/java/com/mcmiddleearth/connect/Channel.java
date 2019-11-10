@@ -35,6 +35,7 @@ public class Channel {
     public static final String SPAWN    = "spawn";
     public static final String DISCORD  = "Discord";
     public static final String WORLD_UUID  = "world_uuid";
+    public static final String LEGACY      = "legacy";
     
 }
 

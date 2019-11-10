@@ -16,12 +16,14 @@
  */
 package com.mcmiddleearth.connect.bungee.warp;
 
+import com.mcmiddleearth.connect.Permission;
 import com.mcmiddleearth.connect.bungee.Handler.ChatMessageHandler;
 import com.mcmiddleearth.connect.bungee.Handler.TpposHandler;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 
 /**
@@ -61,13 +63,18 @@ public class WarpHandler {
 //Logger.getGlobal().info("World unknown!");
                 ChatMessageHandler.handle(player.getServer().getInfo().getName(), player.getName(), 
                                           ChatColor.RED+"The world of that warp could not be found!", 10);
-            } else {
+            } else if((player.hasPermission(Permission.WORLD+"."
+                       +warp.getWorld().toLowerCase()))){
 //Logger.getGlobal().info("Warpin!!");
                 TpposHandler.handle(player.getName(), warp.getServer(), 
                                     warp.getWorld(), warp.getLocation(), 
-                                    warp.getWelcomeMessage()
+                                    ChatColor.AQUA+warp.getWelcomeMessage()
                                            .replace("%player%", player.getName())
                                            .replace("%warp%",warp.getName()));
+            } else {
+                player.sendMessage(new ComponentBuilder("You don't have permission to enter world '"
+                                                         +warp.getWorld()+"'.")
+                                        .color(ChatColor.RED).create());
             }
             return true;
         }

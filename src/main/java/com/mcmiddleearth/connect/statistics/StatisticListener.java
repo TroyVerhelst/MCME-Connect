@@ -36,13 +36,13 @@ public class StatisticListener implements Listener {
     
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
-        ConnectPlugin.getStatisticStorage().loadStatistic(event.getPlayer());
         new BukkitRunnable() {
             @Override
             public void run() {
-                ConnectPlugin.getStatisticStorage().saveStatistic(event.getPlayer());
+                ConnectPlugin.getStatisticStorage().loadStaticstic(event.getPlayer(),player -> 
+                    ConnectPlugin.getStatisticStorage().saveStatistic(player));
             }
-        }.runTaskLater(ConnectPlugin.getInstance(), 60);
+        }.runTaskLater(ConnectPlugin.getInstance(), 80);
     }
     
     @EventHandler(priority = EventPriority.MONITOR)
