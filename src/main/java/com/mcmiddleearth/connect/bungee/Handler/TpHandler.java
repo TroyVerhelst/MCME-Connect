@@ -46,7 +46,7 @@ public class TpHandler {
                 }, ConnectBungeePlugin.getConnectDelay(), TimeUnit.MILLISECONDS);
             }
         };
-        return (ConnectHandler.handle(sender, server, callback));/*if {
+        return (ConnectHandler.handle(sender, server, true, callback));/*if {
             ProxiedPlayer destination = ProxyServer.getInstance().getPlayer(target);
             ProxyServer.getInstance().getScheduler().schedule(ConnectBungeePlugin.getInstance(), () -> {
 Logger.getGlobal().info("onChat tp to player");

@@ -21,10 +21,10 @@ import com.google.common.io.ByteStreams;
 import com.mcmiddleearth.connect.Channel;
 import com.mcmiddleearth.connect.Permission;
 import com.mcmiddleearth.connect.bungee.ConnectBungeePlugin;
+import com.mcmiddleearth.connect.bungee.Handler.LegacyPlayerHandler;
 import com.mcmiddleearth.connect.bungee.vanish.VanishHandler;
 import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Logger;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -71,7 +71,10 @@ public class ConnectionListener implements Listener {
             }
             if(ConnectBungeePlugin.getLegacyPlayers().contains(event.getPlayer().getUniqueId())
                     && event.getTarget().getName().equals(ConnectBungeePlugin.getLegacyRedirectFrom())) {
-                event.setTarget(ProxyServer.getInstance().getServerInfo(ConnectBungeePlugin.getLegacyRedirectTo()));
+                //event.setTarget(ProxyServer.getInstance().getServerInfo(ConnectBungeePlugin.getLegacyRedirectTo()));
+                LegacyPlayerHandler.handle(event.getPlayer(),
+                                           ConnectBungeePlugin.getLegacyRedirectFrom(),
+                                           ConnectBungeePlugin.getLegacyRedirectTo());
             }
         }
     }
@@ -82,7 +85,7 @@ public class ConnectionListener implements Listener {
                           || !fake 
                           || !p.hasPermission(Permission.VANISH_SEE))
                 .forEach(p -> {
-                p.sendMessage(new ComponentBuilder(player.getName()+" joined the MCME-Network.")
+                p.sendMessage(new ComponentBuilder(player.getName()+" joined the game.")
                                             .color(ChatColor.YELLOW).create());
         });
         Iterator<ProxiedPlayer> it = ProxyServer.getInstance().getPlayers().iterator();
@@ -106,7 +109,7 @@ public class ConnectionListener implements Listener {
                           || !fake 
                           || !p.hasPermission(Permission.VANISH_SEE))
                 .forEach(p -> {
-                p.sendMessage(new ComponentBuilder(player.getName()+" left the MCME-Network.")
+                p.sendMessage(new ComponentBuilder(player.getName()+" left the game.")
                                             .color(ChatColor.YELLOW).create());
         });
         ProxiedPlayer other = getOtherPlayer(player); 

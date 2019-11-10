@@ -173,7 +173,7 @@ public class MyWarpDBConnector {
                 result = result + "[ |-]";
             }
         }
-        return "^"+result;
+        return result;
     }
     
     public static void addWorldUUID(String uuid, String worldName) {

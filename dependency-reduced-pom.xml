@@ -39,6 +39,7 @@
               <artifactSet>
                 <includes>
                   <include>org.mariadb.jdbc:mariadb-java-client</include>
+                  <include>com.github.mryurihi:tbnbt</include>
                 </includes>
               </artifactSet>
             </configuration>

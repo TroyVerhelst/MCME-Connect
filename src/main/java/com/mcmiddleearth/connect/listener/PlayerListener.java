@@ -17,6 +17,7 @@
 package com.mcmiddleearth.connect.listener;
 
 import com.mcmiddleearth.connect.ConnectPlugin;
+import com.mcmiddleearth.connect.statistics.FirstJoinDateUpdater;
 import com.mcmiddleearth.connect.util.ConnectUtil;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -37,6 +38,7 @@ public class PlayerListener implements Listener {
         new BukkitRunnable(){
             @Override
             public void run() {
+                FirstJoinDateUpdater.update(event.getPlayer());
                 ConnectUtil.sendWorldUUID(event.getPlayer(),
                                           event.getPlayer().getWorld().getUID(),
                                           event.getPlayer().getWorld().getName());

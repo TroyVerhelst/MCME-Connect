@@ -17,9 +17,11 @@
 package com.mcmiddleearth.connect.listener;
 
 import com.google.common.io.ByteArrayDataInput;
+import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import com.mcmiddleearth.connect.Channel;
 import com.mcmiddleearth.connect.ConnectPlugin;
+import com.mcmiddleearth.connect.statistics.StatisticDBConnector;
 import com.onarandombox.MultiverseCore.MultiverseCore;
 import github.scarsz.discordsrv.DiscordSRV;
 import github.scarsz.discordsrv.dependencies.jda.core.entities.TextChannel;
@@ -131,11 +133,31 @@ public class ConnectPluginListener implements PluginMessageListener {
 //Logger.getGlobal().info("Recieved discord message: "+name+" - "+event);
             //TextChannel discordChannel = DiscordUtil.getTextChannelById("global");
             if(event.equals("join")) {
-                sendDiscord(":bangbang: **"+name+" joined the MCME-Network.**");
+                sendDiscord(":bangbang: **"+name+" joined the game.**");
             } else if(event.equals("leave")) {
-                sendDiscord(":x: **"+name+" left the MCME-Network.**");
+                sendDiscord(":x: **"+name+" left the game.**");
             }
-            
+        } else if(subchannel.equals(Channel.LEGACY)) {
+            String playerName = in.readUTF();
+            String target = in.readUTF();
+//Logger.getGlobal().info("Recieved LEGACY message: "+playerName+" - "+target);
+            runAfterArrival(playerName, p -> {
+                if(ConnectPlugin.getStatisticStorage()!=null) {
+                    ConnectPlugin.getStatisticStorage().saveStaticstic(p, pp-> {
+                        ByteArrayDataOutput out = ByteStreams.newDataOutput();
+                        out.writeUTF("Connect");
+                        out.writeUTF(target);
+    //Logger.getGlobal().info("Sending forward message after stats: "+playerName+" - "+target);
+                        pp.sendPluginMessage(ConnectPlugin.getInstance(), "BungeeCord", out.toByteArray());
+                    });
+                } else {
+                    ByteArrayDataOutput out = ByteStreams.newDataOutput();
+                    out.writeUTF("Connect");
+                    out.writeUTF(target);
+//Logger.getGlobal().info("Sending forward message: "+playerName+" - "+target);
+                    p.sendPluginMessage(ConnectPlugin.getInstance(), "BungeeCord", out.toByteArray());
+                }
+            });
         }
     }
     
@@ -151,12 +173,12 @@ public class ConnectPluginListener implements PluginMessageListener {
             if (channel != null) {
               DiscordUtil.sendMessage(channel, message, 0, false);
             } else {
-              Logger.getLogger("TheGaffer").warning("Discord channel not found.");
+              Logger.getLogger("ConnectPlugin").warning("Discord channel not found.");
             }
           }
           else
           {
-            Logger.getLogger("TheGaffer").warning("DiscordSRV plugin not found.");
+            Logger.getLogger("ConnectPlugin").warning("DiscordSRV plugin not found.");
           }
         }
     }

@@ -50,6 +50,8 @@ public class ConnectPlugin extends JavaPlugin {
             statisticStorage = new StatisticDBConnector(getConfig().getConfigurationSection("database"));
             Bukkit.getPluginManager().registerEvents(new StatisticListener(), this);
         }
+        Bukkit.getServer().getMessenger()
+                .registerOutgoingPluginChannel(this, "BungeeCord");
         discordChannel = getConfig().getString("discordChannel","");
         Bukkit.getServer().getMessenger()
                 .registerOutgoingPluginChannel(this, Channel.MAIN);

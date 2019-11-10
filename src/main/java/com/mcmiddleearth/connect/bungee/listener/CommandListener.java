@@ -48,7 +48,7 @@ public class CommandListener implements Listener {
         if(event.isCommand() && event.getSender() instanceof ProxiedPlayer) {
 //Logger.getGlobal().info("Is command!");
             ProxiedPlayer player = (ProxiedPlayer) event.getSender();
-            String[] message = event.getMessage().split(" ");
+            String[] message = replaceAlias(event.getMessage()).split(" ");
 //if(message.length>1) 
 //Logger.getGlobal().info("server "+message[0]+" "+message[1]+" "+ProxyServer.getInstance().getServerInfo(message[1]));
             if(message[0].equalsIgnoreCase("/tp") && message.length>1) {
@@ -199,6 +199,7 @@ public class CommandListener implements Listener {
         String[] args = event.getCursor().split(" ");
         if(args.length>0) {
             switch(args[0]) {
+                case "/msg":
                 case "/tp":
                 case "/tphere":
                     Collection<ProxiedPlayer> players = ProxyServer.getInstance().getPlayers();
@@ -235,6 +236,14 @@ public class CommandListener implements Listener {
         return ProxyServer.getInstance().getPlayers().stream()
                 .filter(player -> player.getName().toLowerCase().startsWith(name.toLowerCase()))
                 .findFirst().orElse(null);
+    }
+
+    private String replaceAlias(String message) {
+        message = message.replace("/mv tp", "/mvtp");
+        for(String server: ProxyServer.getInstance().getServers().keySet()) {
+            message = message.replace("/"+server, "/mvtp "+server);
+        }
+        return message;
     }
     
 }
