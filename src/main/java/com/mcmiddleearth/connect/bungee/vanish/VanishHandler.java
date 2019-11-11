@@ -80,6 +80,7 @@ public class VanishHandler {
     }
     
     public static void vanish(ProxiedPlayer player) {
+//Logger.getGlobal().info("Vanish!");
         vanishedPlayers.add(player.getUniqueId());
         saveVanished();
         ProxyServer.getInstance().getPlayers().stream()
@@ -102,10 +103,19 @@ public class VanishHandler {
     }
     
     public static boolean isVanished(ProxiedPlayer player) {
+//Logger.getGlobal().info("Vanished: "+player.getName()+" "+pvSupport+" "+vanishedPlayers.contains(player.getUniqueId()));
         return pvSupport && vanishedPlayers.contains(player.getUniqueId());
     }
     
     public static void saveVanished() {
+//Logger.getGlobal().info("saveVanished");
+        if(!vanishFile.exists()) {
+            try {
+                vanishFile.createNewFile();
+            } catch (IOException ex) {
+                Logger.getLogger(VanishHandler.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
         try(PrintWriter out = new PrintWriter(new FileWriter(vanishFile))) {
             vanishedPlayers.forEach(uuid -> {
                 out.println(uuid.toString());

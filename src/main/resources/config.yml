@@ -26,3 +26,4 @@ database:
   password: development
   ip: localhost
   port: 3306
+# for synchronization of first joined date create in plugin data folder a symlink to playerdata folder of first join server.

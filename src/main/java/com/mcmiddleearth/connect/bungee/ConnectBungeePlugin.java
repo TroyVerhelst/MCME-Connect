@@ -33,9 +33,7 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.UUID;
@@ -93,6 +91,7 @@ public class ConnectBungeePlugin extends Plugin {
         if(myWarpEnabled) {
             myWarpConnector = new MyWarpDBConnector(getConfig().getSection("myWarp"));
         }
+//Logger.getGlobal().info("HeY ");
         if(VanishHandler.isPvSupport()) {
 //Logger.getGlobal().info("enable vanish support ");
             VanishHandler.loadVanished();
