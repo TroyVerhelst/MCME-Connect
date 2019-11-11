@@ -21,6 +21,7 @@ import com.mcmiddleearth.connect.bungee.ConnectBungeePlugin;
 import com.mcmiddleearth.connect.bungee.Handler.TpHandler;
 import com.mcmiddleearth.connect.bungee.Handler.MvtpHandler;
 import com.mcmiddleearth.connect.bungee.Handler.ThemeHandler;
+import com.mcmiddleearth.connect.bungee.vanish.VanishHandler;
 import com.mcmiddleearth.connect.bungee.warp.WarpHandler;
 import java.util.Collection;
 import net.md_5.bungee.api.ChatColor;
@@ -199,16 +200,19 @@ public class CommandListener implements Listener {
         String[] args = event.getCursor().split(" ");
         if(args.length>0) {
             switch(args[0]) {
-                case "/msg":
-                case "/tp":
-                case "/tphere":
+                /*case "/call":
+                case "/tpa":
+                case "/tpahere":
                     Collection<ProxiedPlayer> players = ProxyServer.getInstance().getPlayers();
-                    if(args.length>1) {
-                        players.stream().filter(player -> player.getName().toLowerCase()
-                                                                .startsWith(args[1].toLowerCase()))
-                                        .forEach(player -> event.getSuggestions().add(player.getName()));
+                    if(args.length>1 && event.getSender() instanceof ProxiedPlayer) {
+                        players.stream()
+                               .filter(player -> 
+                                    player.getName().toLowerCase().startsWith(args[1].toLowerCase())
+                                 && player.getServer().getInfo().getName().equals(
+                                        ((ProxiedPlayer)event.getSender()).getServer().getInfo().getName()))
+                               .forEach(player -> event.getSuggestions().add(player.getName()));
                     }
-                    break;
+                    break;*/
                 case "/mvtp":
                 case "/world":
                     Collection<String> servers = ProxyServer.getInstance().getServers().keySet();
@@ -219,12 +223,34 @@ public class CommandListener implements Listener {
                     } else {
                         event.getSuggestions().addAll(servers);
                     }
+                    break;
+                case "/tp":
+                case "/tphere":
+                case "/msg":
+                case "/tell":
+                    if(args.length>1) {
+                        suggestAllPlayers(event,args[args.length-1]);
+                    }
+                    break;
+                default:
+//Logger.getGlobal().info("Default: "+args[0]+" "+args[0].startsWith("/"));
+                    if(!args[0].startsWith("/")) {
+                        suggestAllPlayers(event,args[args.length-1]);
+                    }
             }
         } 
-        if(event.getSuggestions().isEmpty()) {
+        /*if(event.getSuggestions().isEmpty()) {
             Collection<ProxiedPlayer> players = ProxyServer.getInstance().getPlayers();
             players.forEach(player -> event.getSuggestions().add(player.getName()));
-        }
+        }*/
+    }
+    
+    private void suggestAllPlayers(TabCompleteEvent event, String start) {
+        Collection<ProxiedPlayer> players = ProxyServer.getInstance().getPlayers();
+        players.stream().filter(player -> player.getName().toLowerCase()
+                                                .startsWith(start.toLowerCase())
+                                       && !VanishHandler.isVanished(player))
+                        .forEach(player -> event.getSuggestions().add(player.getName()));
     }
     
     private void sendError(ProxiedPlayer player) {
