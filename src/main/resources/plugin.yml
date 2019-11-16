@@ -4,3 +4,35 @@ version: ${project.version}
 description: Connecting MCME servers in a BungeeCord
 load: POSTWORLD
 depend: []
+
+commands:
+    reboot:
+        description: manages server restarts across the network
+        usage: /restart <server>|proxy|all|reloadconfig|cancel
+#    shutdown:
+#        description: manages server shutdown across the network
+#        usage: /shutdown <server>|proxy|all
+permissions:
+    mcmeconnect.tp:
+        description: allows to tp to other players across the network
+        default: op
+    mcmeconnect.tp.other:
+        description: allows to tp other players across the network
+        default: op
+        children:
+            mcmeconnect.tp: true
+    mcmeconnect.tphere:
+        description: allows to use /tphere across the network
+        default: op
+    mcmeconnect.world:
+        description: subnodes like mcmeconnect.world.moria allow to access that server
+        default: op
+    mcmeconnect.watchdog:
+        description: displays warnings in case of a server being down
+        default: op
+    mcmeconnect.ignoreDisabledMVTP:
+        description: allows to use /mvtp or /world in protected new player area
+        default: op
+    mcmeconnect.restart:
+        description: allows to restarts servers
+        default: op

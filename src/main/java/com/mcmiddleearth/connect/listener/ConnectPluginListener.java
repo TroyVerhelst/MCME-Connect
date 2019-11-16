@@ -21,7 +21,7 @@ import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import com.mcmiddleearth.connect.Channel;
 import com.mcmiddleearth.connect.ConnectPlugin;
-import com.mcmiddleearth.connect.statistics.StatisticDBConnector;
+import com.mcmiddleearth.connect.restart.RestartHandler;
 import com.onarandombox.MultiverseCore.MultiverseCore;
 import github.scarsz.discordsrv.DiscordSRV;
 import github.scarsz.discordsrv.dependencies.jda.core.entities.TextChannel;
@@ -30,7 +30,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
-import net.md_5.bungee.api.ChatColor;
+import org.bukkit.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -145,18 +145,42 @@ public class ConnectPluginListener implements PluginMessageListener {
                 if(ConnectPlugin.getStatisticStorage()!=null) {
                     ConnectPlugin.getStatisticStorage().saveStaticstic(p, pp-> {
                         ByteArrayDataOutput out = ByteStreams.newDataOutput();
-                        out.writeUTF("Connect");
+                        out.writeUTF(Channel.CONNECT);
                         out.writeUTF(target);
     //Logger.getGlobal().info("Sending forward message after stats: "+playerName+" - "+target);
                         pp.sendPluginMessage(ConnectPlugin.getInstance(), "BungeeCord", out.toByteArray());
                     });
                 } else {
                     ByteArrayDataOutput out = ByteStreams.newDataOutput();
-                    out.writeUTF("Connect");
+                    out.writeUTF(Channel.CONNECT);
                     out.writeUTF(target);
 //Logger.getGlobal().info("Sending forward message: "+playerName+" - "+target);
                     p.sendPluginMessage(ConnectPlugin.getInstance(), "BungeeCord", out.toByteArray());
                 }
+            });
+        } else if(subchannel.equals(Channel.RESTART)) {
+            boolean shutdown = in.readBoolean();
+            String playerName = in.readUTF();
+            String servers = in.readUTF();
+            runAfterArrival(playerName, p -> {
+                if(servers.length()>0) {
+                    ByteArrayDataOutput out = ByteStreams.newDataOutput();
+                    out.writeUTF(Channel.RESTART);
+                    out.writeBoolean(shutdown);
+                    out.writeUTF(playerName);
+                    out.writeUTF(servers);
+                    p.sendPluginMessage(ConnectPlugin.getInstance(), Channel.MAIN, out.toByteArray());
+                }
+                new BukkitRunnable() {
+                    @Override
+                    public void run() {
+                        if(!shutdown) {
+                            RestartHandler.restartServer();
+                        } else {
+                            Bukkit.shutdown();
+                        }
+                    }
+                }.runTaskLater(ConnectPlugin.getInstance(), 60);
             });
         }
     }

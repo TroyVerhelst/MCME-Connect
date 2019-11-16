@@ -22,9 +22,11 @@ import com.mcmiddleearth.connect.bungee.Handler.ConnectHandler;
 import com.mcmiddleearth.connect.bungee.Handler.TpposHandler;
 import com.mcmiddleearth.connect.Channel;
 import com.mcmiddleearth.connect.bungee.Handler.ChatMessageHandler;
+import com.mcmiddleearth.connect.bungee.Handler.RestartHandler;
 import com.mcmiddleearth.connect.bungee.Handler.TitleHandler;
 import com.mcmiddleearth.connect.bungee.warp.MyWarpDBConnector;
 import java.util.logging.Logger;
+import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.event.PluginMessageEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
@@ -99,6 +101,12 @@ public class PluginMessageListener implements Listener {
                     MyWarpDBConnector.addWorldUUID(uuid, worldName);
                     break;
                 }
+                case Channel.RESTART:
+                    boolean shutdown = in.readBoolean();
+                    String player = in.readUTF();
+                    String[] servers = in.readUTF().split(" ");
+                    RestartHandler.handle(ProxyServer.getInstance().getPlayer(player), servers, shutdown);
+                    break;
                 default:
                     break;
             }

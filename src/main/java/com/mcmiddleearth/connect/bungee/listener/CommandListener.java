@@ -20,10 +20,13 @@ import com.mcmiddleearth.connect.Permission;
 import com.mcmiddleearth.connect.bungee.ConnectBungeePlugin;
 import com.mcmiddleearth.connect.bungee.Handler.TpHandler;
 import com.mcmiddleearth.connect.bungee.Handler.MvtpHandler;
+import com.mcmiddleearth.connect.bungee.Handler.RestartHandler;
 import com.mcmiddleearth.connect.bungee.Handler.ThemeHandler;
 import com.mcmiddleearth.connect.bungee.vanish.VanishHandler;
 import com.mcmiddleearth.connect.bungee.warp.WarpHandler;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.logging.Logger;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -184,6 +187,27 @@ public class CommandListener implements Listener {
                 } else {
                     event.setCancelled(WarpHandler.handle(player, message));
                 }
+            } else if(message[0].equalsIgnoreCase("/reboot")) {
+                if(!player.hasPermission(Permission.RESTART)) {
+                    player.sendMessage(new ComponentBuilder(
+                                            "You are not allowed to use that command.")
+                                            .color(ChatColor.RED).create());
+                    event.setCancelled(true);
+                }
+                if(message.length>1 && !message[1].equalsIgnoreCase("reloadconfig")
+                                    && !message[1].equalsIgnoreCase("cancel")) {
+                    RestartHandler.handle(player, Arrays.copyOfRange(message, 1, message.length));
+                    event.setCancelled(true);
+                }
+            } else if(message[0].equalsIgnoreCase("/stop") && message.length>1) {
+                if(!player.hasPermission(Permission.RESTART)) {
+                    player.sendMessage(new ComponentBuilder(
+                                            "You are not allowed to use that command.")
+                                            .color(ChatColor.RED).create());
+                    event.setCancelled(true);
+                }
+                RestartHandler.handle(player, Arrays.copyOfRange(message, 1, message.length),true);
+                event.setCancelled(true);
             }
         }
     }
@@ -231,6 +255,20 @@ public class CommandListener implements Listener {
                     if(args.length>1) {
                         suggestAllPlayers(event,args[args.length-1]);
                     }
+                    break;
+                case "/reboot":
+                        servers = ProxyServer.getInstance().getServers().keySet();
+                        servers.add("reloadconfig");
+                        servers.add("cancel");
+                        servers.add("proxy");
+                        if(args.length>1) {
+                            servers.stream().filter(server -> server.toLowerCase()
+                                                           .startsWith(args[1].toLowerCase()))
+                                    .forEach(server -> event.getSuggestions().add(server));
+                        } else {
+                            event.getSuggestions().addAll(servers);
+                            
+                        }
                     break;
                 default:
 //Logger.getGlobal().info("Default: "+args[0]+" "+args[0].startsWith("/"));

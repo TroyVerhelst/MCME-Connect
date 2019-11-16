@@ -28,6 +28,7 @@ import com.mcmiddleearth.connect.bungee.listener.CommandListener;
 import com.mcmiddleearth.connect.bungee.vanish.VanishListener;
 import com.mcmiddleearth.connect.bungee.warp.MyWarpDBConnector;
 import com.mcmiddleearth.connect.bungee.watchdog.ServerWatchdog;
+import com.mcmiddleearth.connect.bungee.Handler.RestartHandler;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
@@ -79,6 +80,7 @@ public class ConnectBungeePlugin extends Plugin {
     @Override
     public void onEnable() {
         instance = this;
+        RestartHandler.init();
         if(config.getBoolean("serverWatchdog", true)) {
             watcher = new ServerWatchdog();
         }

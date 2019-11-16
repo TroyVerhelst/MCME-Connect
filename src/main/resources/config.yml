@@ -26,4 +26,30 @@ database:
   password: development
   ip: localhost
   port: 3306
-# for synchronization of first joined date create in plugin data folder a symlink to playerdata folder of first join server.
+  
+# for scheduled restarts and /restart command servers need to be started by a
+# script which restarts the server depending on existance 
+# of file /Plugins/MCME-Connect/restart.nfo.
+# Example for linux bash script:
+#
+# #!/bin/bash
+#
+# while true
+#  do
+#    java -Xmx4G -jar spigot-1.12.2.jar 
+#    echo start
+#	sleep 1
+#	if [ -e plugins/MCME-Connect/restart.nfo ] 
+#	  then
+#	    rm plugins/MCME-Connect/restart.nfo  
+#	  else
+#	    break
+#	fi
+# done
+scheduledRestarts:
+# - ALL 11:00:00
+  - TUESDAY 11:00:00
+  - WEDNESDAY 10:00:00
+
+# for synchronization of first joined date create in plugin data folder a 
+# symlink to playerdata folder of first join server.
