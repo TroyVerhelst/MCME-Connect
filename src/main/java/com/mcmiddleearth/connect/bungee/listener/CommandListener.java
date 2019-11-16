@@ -18,6 +18,7 @@ package com.mcmiddleearth.connect.bungee.listener;
 
 import com.mcmiddleearth.connect.Permission;
 import com.mcmiddleearth.connect.bungee.ConnectBungeePlugin;
+import com.mcmiddleearth.connect.bungee.Handler.ConnectHandler;
 import com.mcmiddleearth.connect.bungee.Handler.TpHandler;
 import com.mcmiddleearth.connect.bungee.Handler.MvtpHandler;
 import com.mcmiddleearth.connect.bungee.Handler.RestartHandler;
@@ -26,7 +27,7 @@ import com.mcmiddleearth.connect.bungee.vanish.VanishHandler;
 import com.mcmiddleearth.connect.bungee.warp.WarpHandler;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.logging.Logger;
+import net.md_5.bungee.api.Callback;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -160,13 +161,19 @@ public class CommandListener implements Listener {
                     if(!isMvtpAllowed(player)) {
 //   wrong config key                                 .equals(ConnectBungeePlugin.getLegacyRedirectFrom())) {
                         player.sendMessage(new ComponentBuilder(
-                                                "/mvtp isn't allowed here.")
+                                                "/mvtp and /world isn't allowed here.")
                                                 .color(ChatColor.RED).create());
                     } else {
                         if(player.hasPermission(Permission.WORLD+"."+target)) {
     //Logger.getGlobal().info("handle");
-                            if(!MvtpHandler.handle(player.getName(),target)) {
-                                sendError(player);
+                            if(message[0].equalsIgnoreCase("/mvtp")) {
+                                if(!MvtpHandler.handle(player.getName(),target)) {
+                                    sendError(player);
+                                }
+                            } else {
+                                if(!ConnectHandler.handle(player.getName(), target, true, (Boolean success, Throwable error) -> {})) {
+                                    sendError(player);
+                                }
                             }
                         } else {
                             player.sendMessage(new ComponentBuilder("You don't have permission to enter world '"
