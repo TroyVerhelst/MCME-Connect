@@ -17,6 +17,7 @@
 package com.mcmiddleearth.connect.statistics;
 
 import com.mcmiddleearth.connect.ConnectPlugin;
+import com.mcmiddleearth.connect.bungee.ConnectBungeePlugin;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -24,9 +25,12 @@ import java.sql.SQLException;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import net.md_5.bungee.api.ProxyServer;
+import net.md_5.bungee.api.scheduler.ScheduledTask;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.MemoryConfiguration;
 import org.bukkit.entity.Player;
@@ -71,6 +75,9 @@ public class StatisticDBConnector {
     
     private ExecutorService executor = Executors.newSingleThreadExecutor();
     
+    private ScheduledTask keepAliveTask;
+    private boolean connected; 
+    
     public StatisticDBConnector(ConfigurationSection config) {
         if(config==null) {
             config = new MemoryConfiguration();
@@ -83,13 +90,17 @@ public class StatisticDBConnector {
         dataBase = new MySQLDataSource(dbIp,port,dbName);
         connect();
         checkConnection();
+        keepAliveTask = ProxyServer.getInstance().getScheduler()
+                .schedule(ConnectBungeePlugin.getInstance(), () -> {
+            checkConnection();
+        },30,60,TimeUnit.SECONDS);
     }
     
     private void executeAsync(Consumer<Player> method, Player player) {
         new BukkitRunnable() {
             @Override
             public void run() {
-                if(!checkConnection()) {
+                if(!connected) {
                     connect();
                 }
                 method.accept(player);
@@ -99,13 +110,19 @@ public class StatisticDBConnector {
     
     private synchronized boolean checkConnection() {
         try {
-            if(true || dbConnection.isValid(5)) {
+            if(connected && dbConnection.isValid(5)) {
                 return true;
             } else {
-                throw new SQLException("No connection to statistic database!");
+                //throw new SQLException("No connection to statistic database!");
+                if(dbConnection!=null) {
+                    dbConnection.close();
+                }
+                connect();
             }
+            return true;
         } catch (SQLException ex) {
             Logger.getLogger(StatisticDBConnector.class.getName()).log(Level.SEVERE, null, ex);
+            connected = false;
             return false;
         }
     }
@@ -190,12 +207,18 @@ public class StatisticDBConnector {
             selectPlayerId = dbConnection
                     .prepareStatement("SELECT id FROM mcmeconnect_statistic WHERE uuid = ?");
             selectPlayerId.setFetchSize(1);
+            connected = true;
         } catch (SQLException ex) {
             Logger.getLogger(StatisticDBConnector.class.getName()).log(Level.SEVERE, null, ex);
+            connected = false;
         }
     }
     
     public synchronized void disconnect() {
+        connected = false;
+        if(keepAliveTask!=null) {
+            keepAliveTask.cancel();
+        }
         if(dbConnection!=null) {
             try {
                 dbConnection.close();
@@ -387,6 +410,7 @@ public class StatisticDBConnector {
                 }
             } catch (SQLException ex) {
                 Logger.getLogger(StatisticDBConnector.class.getName()).log(Level.SEVERE, null, ex);
+                connected = false;
             }
     }
     
@@ -422,6 +446,7 @@ public class StatisticDBConnector {
             }
         } catch (SQLException ex) {
             Logger.getLogger(StatisticDBConnector.class.getName()).log(Level.SEVERE, null, ex);
+            connected = false;
         }
     }
     
@@ -489,6 +514,7 @@ public class StatisticDBConnector {
             }
         } catch (SQLException ex) {
             Logger.getLogger(StatisticDBConnector.class.getName()).log(Level.SEVERE, null, ex);
+            connected = false;
         }
     }
     
@@ -532,6 +558,7 @@ public class StatisticDBConnector {
             }
         } catch (SQLException ex) {
             Logger.getLogger(StatisticDBConnector.class.getName()).log(Level.SEVERE, null, ex);
+            connected = false;
         }
     }
     

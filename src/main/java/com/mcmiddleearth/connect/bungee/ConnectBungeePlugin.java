@@ -77,6 +77,7 @@ public class ConnectBungeePlugin extends Plugin {
     
     @Getter
     private static boolean myWarpEnabled;
+    
     @Override
     public void onEnable() {
         instance = this;
@@ -110,6 +111,7 @@ public class ConnectBungeePlugin extends Plugin {
     @Override
     public void onDisable() {
         watcher.stopWatchdog();
+        myWarpConnector.disconnect();
     }
     
     public static boolean isMvtpDisabled(String server) {
