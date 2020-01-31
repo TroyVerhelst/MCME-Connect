@@ -62,6 +62,7 @@ public class ConnectBungeePlugin extends Plugin {
     @Getter 
     private static String legacyRedirectTo = "world";
     
+    @Getter
     private static ServerWatchdog watcher;
     
     @Getter

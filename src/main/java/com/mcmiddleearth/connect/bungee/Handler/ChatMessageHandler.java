@@ -32,26 +32,23 @@ import net.md_5.bungee.api.connection.ProxiedPlayer;
 public class ChatMessageHandler {
     
     public static boolean handle(String server, String recipient, String message, int delay) {
-        ProxyServer.getInstance().getScheduler().schedule(ConnectBungeePlugin.getInstance(), new Runnable() {
-            @Override    
-            public void run() {
-                Collection<ProxiedPlayer> players = new HashSet<>();
-                if(recipient.equals(Channel.ALL)) {
-                    if(server.equals(Channel.ALL)) {
-                        players = ProxyServer.getInstance().getPlayers();
-                    } else {
-                        players = ProxyServer.getInstance().getServerInfo(server).getPlayers();
-                    }
+        ProxyServer.getInstance().getScheduler().schedule(ConnectBungeePlugin.getInstance(), () -> {
+            Collection<ProxiedPlayer> players = new HashSet<>();
+            if(recipient.equals(Channel.ALL)) {
+                if(server.equals(Channel.ALL)) {
+                    players = ProxyServer.getInstance().getPlayers();
                 } else {
-                    ProxiedPlayer player = ProxyServer.getInstance().getPlayer(recipient);
-                    if(server.equals(Channel.ALL)
-                            || player.getServer().getInfo().getName().equals(server)) {
-                        players.add(player);
-                    }
+                    players = ProxyServer.getInstance().getServerInfo(server).getPlayers();
                 }
-                players.forEach(player -> 
-                    player.sendMessage(new ComponentBuilder(message).create()));
+            } else {
+                ProxiedPlayer player = ProxyServer.getInstance().getPlayer(recipient);
+                if(server.equals(Channel.ALL)
+                        || player.getServer().getInfo().getName().equals(server)) {
+                    players.add(player);
+                }
             }
+            players.forEach(player ->
+                    player.sendMessage(new ComponentBuilder(message).create()));
         }, delay, TimeUnit.MILLISECONDS);
         return true;
     }

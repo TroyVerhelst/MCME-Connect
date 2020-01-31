@@ -22,12 +22,12 @@ import com.mcmiddleearth.connect.bungee.Handler.ConnectHandler;
 import com.mcmiddleearth.connect.bungee.Handler.TpHandler;
 import com.mcmiddleearth.connect.bungee.Handler.MvtpHandler;
 import com.mcmiddleearth.connect.bungee.Handler.RestartHandler;
+import com.mcmiddleearth.connect.bungee.Handler.RestorestatsHandler;
 import com.mcmiddleearth.connect.bungee.Handler.ThemeHandler;
 import com.mcmiddleearth.connect.bungee.vanish.VanishHandler;
 import com.mcmiddleearth.connect.bungee.warp.WarpHandler;
 import java.util.Arrays;
 import java.util.Collection;
-import net.md_5.bungee.api.Callback;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -152,7 +152,7 @@ public class CommandListener implements Listener {
                     event.setCancelled(true);
                 }
             } else if((message[0].equalsIgnoreCase("/mvtp")
-                       || message[0].equalsIgnoreCase("/world"))
+                       || message[0].equalsIgnoreCase("/switch"))
                     && message.length>1
                     && ProxyServer.getInstance().getServerInfo(message[1])!=null) {
 //Logger.getGlobal().info("/mvtp");
@@ -161,7 +161,7 @@ public class CommandListener implements Listener {
                     if(!isMvtpAllowed(player)) {
 //   wrong config key                                 .equals(ConnectBungeePlugin.getLegacyRedirectFrom())) {
                         player.sendMessage(new ComponentBuilder(
-                                                "/mvtp and /world isn't allowed here.")
+                                                "/mvtp and /switch isn't allowed here.")
                                                 .color(ChatColor.RED).create());
                     } else {
                         if(player.hasPermission(Permission.WORLD+"."+target)) {
@@ -215,6 +215,9 @@ public class CommandListener implements Listener {
                 }
                 RestartHandler.handle(player, Arrays.copyOfRange(message, 1, message.length),true);
                 event.setCancelled(true);
+            } else if(message[0].equalsIgnoreCase("/restorestats")) {
+                RestorestatsHandler.handle(player,message);
+                event.setCancelled(true);
             }
         }
     }
@@ -245,7 +248,7 @@ public class CommandListener implements Listener {
                     }
                     break;*/
                 case "/mvtp":
-                case "/world":
+                case "/switch":
                     Collection<String> servers = ProxyServer.getInstance().getServers().keySet();
                     if(args.length>1) {
                         servers.stream().filter(server -> server.toLowerCase()
@@ -312,7 +315,7 @@ public class CommandListener implements Listener {
     private String replaceAlias(String message) {
         message = message.replace("/mv tp", "/mvtp");
         for(String server: ProxyServer.getInstance().getServers().keySet()) {
-            message = message.replace("/"+server, "/mvtp "+server);
+            message = message.replace("/"+server, "/switch "+server);
         }
         return message;
     }

@@ -17,6 +17,7 @@
 package com.mcmiddleearth.connect.bungee.warp;
 
 import com.mcmiddleearth.connect.bungee.ConnectBungeePlugin;
+import com.mcmiddleearth.connect.statistics.StatisticDBConnector;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
@@ -81,10 +82,11 @@ public class MyWarpDBConnector {
         port = (Integer) config.get("port");//,3306);
         dataBase = new MySQLDataSource(dbIp,port,dbName);
         loadWorldUUIDs();
+        connect();
         keepAliveTask = ProxyServer.getInstance().getScheduler()
                 .schedule(ConnectBungeePlugin.getInstance(), () -> {
             checkConnection();
-        },0,1,TimeUnit.MINUTES);
+        },1,1,TimeUnit.MINUTES);
     }
     
     public void disconnect() {
@@ -102,12 +104,16 @@ public class MyWarpDBConnector {
     private boolean checkConnection() {
         try {
             if(connected && dbConnection.isValid(5)) {
+                ConnectBungeePlugin.getInstance().getLogger().log(Level.INFO, 
+                        "Successfully checked connection to myWarp database.");
                 connected = true;
             } else {
                 //throw new SQLException();
                 if(dbConnection!=null) {
                     dbConnection.close();
                 }
+                ConnectBungeePlugin.getInstance().getLogger().log(Level.INFO, 
+                        "Reconnecting to myWarp database.");
                 connect();
             }
             return true;

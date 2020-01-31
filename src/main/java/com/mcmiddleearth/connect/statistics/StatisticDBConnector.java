@@ -17,7 +17,6 @@
 package com.mcmiddleearth.connect.statistics;
 
 import com.mcmiddleearth.connect.ConnectPlugin;
-import com.mcmiddleearth.connect.bungee.ConnectBungeePlugin;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -25,18 +24,16 @@ import java.sql.SQLException;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.md_5.bungee.api.ProxyServer;
-import net.md_5.bungee.api.scheduler.ScheduledTask;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.MemoryConfiguration;
 import org.bukkit.entity.Player;
 import org.mariadb.jdbc.MySQLDataSource;
 import org.bukkit.Statistic;
 import org.bukkit.Material;
+import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.entity.EntityType;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -75,7 +72,7 @@ public class StatisticDBConnector {
     
     private ExecutorService executor = Executors.newSingleThreadExecutor();
     
-    private ScheduledTask keepAliveTask;
+    private BukkitTask keepAliveTask;
     private boolean connected; 
     
     public StatisticDBConnector(ConfigurationSection config) {
@@ -90,10 +87,12 @@ public class StatisticDBConnector {
         dataBase = new MySQLDataSource(dbIp,port,dbName);
         connect();
         checkConnection();
-        keepAliveTask = ProxyServer.getInstance().getScheduler()
-                .schedule(ConnectBungeePlugin.getInstance(), () -> {
-            checkConnection();
-        },30,60,TimeUnit.SECONDS);
+        keepAliveTask = new BukkitRunnable() {
+            @Override
+            public void run() {
+                checkConnection();
+            }
+        }.runTaskTimer(ConnectPlugin.getInstance(),2000,1200);
     }
     
     private void executeAsync(Consumer<Player> method, Player player) {
@@ -111,6 +110,8 @@ public class StatisticDBConnector {
     private synchronized boolean checkConnection() {
         try {
             if(connected && dbConnection.isValid(5)) {
+                ConnectPlugin.getInstance().getLogger().log(Level.INFO, 
+                        "Successfully checked connection to statistics database.");
                 return true;
             } else {
                 //throw new SQLException("No connection to statistic database!");
@@ -118,6 +119,8 @@ public class StatisticDBConnector {
                     dbConnection.close();
                 }
                 connect();
+                ConnectPlugin.getInstance().getLogger().log(Level.INFO, 
+                        "Reconnecting to statistics database.");
             }
             return true;
         } catch (SQLException ex) {
