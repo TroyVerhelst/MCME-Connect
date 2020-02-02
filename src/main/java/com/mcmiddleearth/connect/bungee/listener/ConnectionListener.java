@@ -22,9 +22,12 @@ import com.mcmiddleearth.connect.Channel;
 import com.mcmiddleearth.connect.Permission;
 import com.mcmiddleearth.connect.bungee.ConnectBungeePlugin;
 import com.mcmiddleearth.connect.bungee.Handler.LegacyPlayerHandler;
+import com.mcmiddleearth.connect.bungee.Handler.RestorestatsHandler;
 import com.mcmiddleearth.connect.bungee.vanish.VanishHandler;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -32,6 +35,7 @@ import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.PlayerDisconnectEvent;
 import net.md_5.bungee.api.event.PostLoginEvent;
 import net.md_5.bungee.api.event.ServerConnectEvent;
+import net.md_5.bungee.api.event.ServerDisconnectEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 
@@ -41,8 +45,43 @@ import net.md_5.bungee.event.EventHandler;
  */
 public class ConnectionListener implements Listener {
 
+    ArrayList<String> priorities = new ArrayList<>();
+    
+    public ConnectionListener() {
+        //priorities.add("world");
+        //priorities.add("moria");
+        //priorities.add("plotworld");
+        //priorities.add("themedbuilds");
+        //priorities.add("freebuild");
+        //priorities.add("newplayerworld");
+    }
     @EventHandler
     public void onJoin(PostLoginEvent event) {
+        if(RestorestatsHandler.getBlacklist().contains(event.getPlayer().getUniqueId())) {
+            event.getPlayer().disconnect(new ComponentBuilder(
+                                    "Your statistics are currently restored. Please wait a minute before rejoining.")
+                                    .color(ChatColor.WHITE).create());
+        }
+/*        ServerInfo server = event.getPlayer().getServer().getInfo();
+Logger.getGlobal().info("Reconnect: "+server);
+        int i = 0;
+        List<String> uplist = ConnectBungeePlugin.getWatcher().getUpList();
+uplist.forEach(entry -> Logger.getGlobal().info(entry));
+        while(server==null || !uplist.contains(server.getName())) {
+Logger.getGlobal().info(""+i);
+            if(i<priorities.size()) {
+                server = ProxyServer.getInstance().getServerInfo(priorities.get(i));    
+Logger.getGlobal().info("Checking: "+server.getName());
+            } else {
+                event.getPlayer().disconnect(new ComponentBuilder(
+                                        "Sorry, all servers are down at the moment.")
+                                        .color(ChatColor.WHITE).create());
+                return;
+            }
+            i++;
+        }
+Logger.getGlobal().info("Connecting to: "+server.getName());
+        event.getPlayer().connect(server);*/
         ProxyServer.getInstance().getScheduler().schedule(ConnectBungeePlugin.getInstance(), () -> {
             ProxiedPlayer player = event.getPlayer();
             if(!VanishHandler.isPvSupport()) {
@@ -66,9 +105,11 @@ public class ConnectionListener implements Listener {
     @EventHandler
     public void handleLegacyPlayers(ServerConnectEvent event) {
         if(event.getReason().equals(ServerConnectEvent.Reason.JOIN_PROXY)) {
+ Logger.getGlobal().info("enabled LEGACY: "+ConnectBungeePlugin.isLegacyRedirectEnabled());
             if(!ConnectBungeePlugin.isLegacyRedirectEnabled()) {
                 return;
             }
+ Logger.getGlobal().info("handle LEGACY: "+ConnectBungeePlugin.getLegacyPlayers().contains(event.getPlayer().getUniqueId()));
             if(ConnectBungeePlugin.getLegacyPlayers().contains(event.getPlayer().getUniqueId())
                     && event.getTarget().getName().equals(ConnectBungeePlugin.getLegacyRedirectFrom())) {
                 //event.setTarget(ProxyServer.getInstance().getServerInfo(ConnectBungeePlugin.getLegacyRedirectTo()));

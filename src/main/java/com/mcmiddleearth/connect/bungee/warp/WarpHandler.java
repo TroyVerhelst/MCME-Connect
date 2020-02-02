@@ -17,11 +17,13 @@
 package com.mcmiddleearth.connect.bungee.warp;
 
 import com.mcmiddleearth.connect.Permission;
+import com.mcmiddleearth.connect.bungee.ConnectBungeePlugin;
 import com.mcmiddleearth.connect.bungee.Handler.ChatMessageHandler;
 import com.mcmiddleearth.connect.bungee.Handler.TpposHandler;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.logging.Logger;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -55,7 +57,7 @@ public class WarpHandler {
         for(int i = 2; i<message.length;i++) {
             warpName = warpName + " " + message[i];
         }
-        Warp warp = MyWarpDBConnector.getWarp(player, warpName);
+        Warp warp = ConnectBungeePlugin.getMyWarpConnector().getWarp(player, warpName);
 //Logger.getGlobal().info("found warp "+warp);
         if(warp !=null && !warp.getWorld().equals(player.getServer().getInfo().getName())) {
 //Logger.getGlobal().info("is Cross World! ");

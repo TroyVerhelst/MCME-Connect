@@ -17,6 +17,7 @@
 package com.mcmiddleearth.connect.bungee.warp;
 
 import com.mcmiddleearth.connect.bungee.ConnectBungeePlugin;
+import com.mcmiddleearth.connect.statistics.StatisticDBConnector;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
@@ -31,12 +32,14 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import lombok.Getter;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
+import net.md_5.bungee.api.scheduler.ScheduledTask;
 import org.mariadb.jdbc.MySQLDataSource;
 
 /**
@@ -53,18 +56,20 @@ public class MyWarpDBConnector {
     
     private final MySQLDataSource dataBase;
     
-    private static Connection dbConnection;
+    private Connection dbConnection;
     
-    private static PreparedStatement getWarp;
+    private PreparedStatement getWarp;
     
-    private static File worldFile = new File(ConnectBungeePlugin.getInstance().getDataFolder(),"world.uuid");
+    private File worldFile = new File(ConnectBungeePlugin.getInstance().getDataFolder(),"world.uuid");
         
-    private static Map<String, String> worldUUID = new HashMap<>();
+    private Map<String, String> worldUUID = new HashMap<>();
     
     @Getter
     private boolean connected = false;
     
     private ExecutorService executor = Executors.newSingleThreadExecutor();
+    
+    private ScheduledTask keepAliveTask;
     
     public MyWarpDBConnector(Map config) {
         if(config==null) {
@@ -77,31 +82,44 @@ public class MyWarpDBConnector {
         port = (Integer) config.get("port");//,3306);
         dataBase = new MySQLDataSource(dbIp,port,dbName);
         loadWorldUUIDs();
-        executeAsync( player -> {
-            connect();
+        connect();
+        keepAliveTask = ProxyServer.getInstance().getScheduler()
+                .schedule(ConnectBungeePlugin.getInstance(), () -> {
             checkConnection();
-        }, null);
+        },1,1,TimeUnit.MINUTES);
     }
     
-    private void executeAsync(Consumer<ProxiedPlayer> method, ProxiedPlayer player) {
-        ProxyServer.getInstance().getScheduler().runAsync(ConnectBungeePlugin.getInstance(), new Runnable() {
-            @Override
-            public void run() {
-                method.accept(player);
-            }
-        });
+    public void disconnect() {
+        connected = false;
+        if(keepAliveTask!=null) {
+            keepAliveTask.cancel();
+        }
+        try {
+            dbConnection.close();
+        } catch (SQLException ex) {
+            Logger.getLogger(MyWarpDBConnector.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
     
     private boolean checkConnection() {
         try {
             if(connected && dbConnection.isValid(5)) {
+                ConnectBungeePlugin.getInstance().getLogger().log(Level.INFO, 
+                        "Successfully checked connection to myWarp database.");
                 connected = true;
-                return true;
             } else {
-                throw new SQLException();
+                //throw new SQLException();
+                if(dbConnection!=null) {
+                    dbConnection.close();
+                }
+                ConnectBungeePlugin.getInstance().getLogger().log(Level.INFO, 
+                        "Reconnecting to myWarp database.");
+                connect();
             }
+            return true;
         } catch (SQLException ex) {
             Logger.getLogger(MyWarpDBConnector.class.getName()).log(Level.SEVERE, "No DB connection!!", ex);
+            connected = false;
             return false;
         }
     }
@@ -124,46 +142,50 @@ public class MyWarpDBConnector {
             connected = true;
         } catch (SQLException ex) {
             Logger.getLogger(MyWarpDBConnector.class.getName()).log(Level.SEVERE, null, ex);
+            connected = false;
         }
     }
     
-    public static Warp getWarp(ProxiedPlayer player, String name) {
-        try {
-            getWarp.setString(1, addWildcards(name));
-            getWarp.setString(2, player.getUniqueId().toString());
-            getWarp.setString(3, player.getUniqueId().toString());
-//Logger.getGlobal().info(getWarp.toString());
-            ResultSet result = getWarp.executeQuery();
-            if(result.first()) {
-                //if(!result.isLast()) {
-                    //several matching warps found
-                //    return null;
-                //}
-                String world = worldUUID.get(result.getString("world.uuid"));
-                if(world==null) {
-                    //world unknown
-                    world = "_unknown";
+    public Warp getWarp(ProxiedPlayer player, String name) {
+        if(connected) {
+            try {
+                getWarp.setString(1, addWildcards(name));
+                getWarp.setString(2, player.getUniqueId().toString());
+                getWarp.setString(3, player.getUniqueId().toString());
+    //Logger.getGlobal().info(getWarp.toString());
+                ResultSet result = getWarp.executeQuery();
+                if(result.first()) {
+                    //if(!result.isLast()) {
+                        //several matching warps found
+                    //    return null;
+                    //}
+                    String world = worldUUID.get(result.getString("world.uuid"));
+                    if(world==null) {
+                        //world unknown
+                        world = "_unknown";
+                    }
+                    Warp warp = new Warp();
+                    warp.setName(result.getString("warp.name"));
+                    warp.setWorld(world);
+                    warp.setServer(world);
+                    warp.setWelcomeMessage(result.getString("warp.welcome_message"));
+                    warp.setLocation(result.getDouble("warp.x")+";"
+                                   + result.getDouble("warp.y")+";"
+                                   + result.getDouble("warp.z")+";"
+                                   + result.getFloat("warp.yaw")+";"
+                                   + result.getFloat("warp.pitch"));
+
+                    return warp;
                 }
-                Warp warp = new Warp();
-                warp.setName(result.getString("warp.name"));
-                warp.setWorld(world);
-                warp.setServer(world);
-                warp.setWelcomeMessage(result.getString("warp.welcome_message"));
-                warp.setLocation(result.getDouble("warp.x")+";"
-                               + result.getDouble("warp.y")+";"
-                               + result.getDouble("warp.z")+";"
-                               + result.getFloat("warp.yaw")+";"
-                               + result.getFloat("warp.pitch"));
-                
-                return warp;
+            } catch (SQLException ex) {
+                Logger.getLogger(MyWarpDBConnector.class.getName()).log(Level.SEVERE, null, ex);
+                connected = false;
             }
-        } catch (SQLException ex) {
-            Logger.getLogger(MyWarpDBConnector.class.getName()).log(Level.SEVERE, null, ex);
         }
         return null;
     }
     
-    private static String addWildcards(String name) {
+    private String addWildcards(String name) {
         String result = "";
         for(int i = 0; i<name.length();i++) {
             String sub = name.substring(i,i+1);
@@ -176,12 +198,12 @@ public class MyWarpDBConnector {
         return result;
     }
     
-    public static void addWorldUUID(String uuid, String worldName) {
+    public void addWorldUUID(String uuid, String worldName) {
         worldUUID.put(uuid, worldName);
         saveWorldUUIDs();
     }
     
-    private static void loadWorldUUIDs() {
+    private void loadWorldUUIDs() {
         if(!worldFile.exists()) {
             return;
         }
@@ -196,7 +218,7 @@ public class MyWarpDBConnector {
         }
     }
     
-    private static void saveWorldUUIDs() {
+    private void saveWorldUUIDs() {
         try(PrintWriter fw = new PrintWriter(new FileWriter(worldFile))) {
             worldUUID.entrySet().forEach((entry) -> {
                 fw.println(entry.getKey()+";"+entry.getValue());

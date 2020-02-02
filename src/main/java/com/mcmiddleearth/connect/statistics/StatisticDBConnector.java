@@ -33,6 +33,7 @@ import org.bukkit.entity.Player;
 import org.mariadb.jdbc.MySQLDataSource;
 import org.bukkit.Statistic;
 import org.bukkit.Material;
+import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.entity.EntityType;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -71,6 +72,9 @@ public class StatisticDBConnector {
     
     private ExecutorService executor = Executors.newSingleThreadExecutor();
     
+    private BukkitTask keepAliveTask;
+    private boolean connected; 
+    
     public StatisticDBConnector(ConfigurationSection config) {
         if(config==null) {
             config = new MemoryConfiguration();
@@ -83,13 +87,19 @@ public class StatisticDBConnector {
         dataBase = new MySQLDataSource(dbIp,port,dbName);
         connect();
         checkConnection();
+        keepAliveTask = new BukkitRunnable() {
+            @Override
+            public void run() {
+                checkConnection();
+            }
+        }.runTaskTimer(ConnectPlugin.getInstance(),2000,1200);
     }
     
     private void executeAsync(Consumer<Player> method, Player player) {
         new BukkitRunnable() {
             @Override
             public void run() {
-                if(!checkConnection()) {
+                if(!connected) {
                     connect();
                 }
                 method.accept(player);
@@ -99,13 +109,23 @@ public class StatisticDBConnector {
     
     private synchronized boolean checkConnection() {
         try {
-            if(true || dbConnection.isValid(5)) {
+            if(connected && dbConnection.isValid(5)) {
+                ConnectPlugin.getInstance().getLogger().log(Level.INFO, 
+                        "Successfully checked connection to statistics database.");
                 return true;
             } else {
-                throw new SQLException("No connection to statistic database!");
+                //throw new SQLException("No connection to statistic database!");
+                if(dbConnection!=null) {
+                    dbConnection.close();
+                }
+                connect();
+                ConnectPlugin.getInstance().getLogger().log(Level.INFO, 
+                        "Reconnecting to statistics database.");
             }
+            return true;
         } catch (SQLException ex) {
             Logger.getLogger(StatisticDBConnector.class.getName()).log(Level.SEVERE, null, ex);
+            connected = false;
             return false;
         }
     }
@@ -190,12 +210,18 @@ public class StatisticDBConnector {
             selectPlayerId = dbConnection
                     .prepareStatement("SELECT id FROM mcmeconnect_statistic WHERE uuid = ?");
             selectPlayerId.setFetchSize(1);
+            connected = true;
         } catch (SQLException ex) {
             Logger.getLogger(StatisticDBConnector.class.getName()).log(Level.SEVERE, null, ex);
+            connected = false;
         }
     }
     
     public synchronized void disconnect() {
+        connected = false;
+        if(keepAliveTask!=null) {
+            keepAliveTask.cancel();
+        }
         if(dbConnection!=null) {
             try {
                 dbConnection.close();
@@ -387,6 +413,7 @@ public class StatisticDBConnector {
                 }
             } catch (SQLException ex) {
                 Logger.getLogger(StatisticDBConnector.class.getName()).log(Level.SEVERE, null, ex);
+                connected = false;
             }
     }
     
@@ -422,6 +449,7 @@ public class StatisticDBConnector {
             }
         } catch (SQLException ex) {
             Logger.getLogger(StatisticDBConnector.class.getName()).log(Level.SEVERE, null, ex);
+            connected = false;
         }
     }
     
@@ -489,6 +517,7 @@ public class StatisticDBConnector {
             }
         } catch (SQLException ex) {
             Logger.getLogger(StatisticDBConnector.class.getName()).log(Level.SEVERE, null, ex);
+            connected = false;
         }
     }
     
@@ -532,6 +561,7 @@ public class StatisticDBConnector {
             }
         } catch (SQLException ex) {
             Logger.getLogger(StatisticDBConnector.class.getName()).log(Level.SEVERE, null, ex);
+            connected = false;
         }
     }
     

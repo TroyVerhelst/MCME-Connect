@@ -18,7 +18,6 @@ package com.mcmiddleearth.connect.restart;
 
 import com.mcmiddleearth.connect.ConnectPlugin;
 import java.io.File;
-import java.io.IOException;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -26,16 +25,12 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import lombok.Getter;
 import org.bukkit.ChatColor;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.Bukkit;
-import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.scheduler.BukkitTask;
-import org.bukkit.configuration.file.YamlConfiguration;
 
 /**
  *

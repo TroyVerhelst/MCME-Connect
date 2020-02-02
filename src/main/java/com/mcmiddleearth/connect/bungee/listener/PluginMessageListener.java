@@ -21,6 +21,7 @@ import com.google.common.io.ByteStreams;
 import com.mcmiddleearth.connect.bungee.Handler.ConnectHandler;
 import com.mcmiddleearth.connect.bungee.Handler.TpposHandler;
 import com.mcmiddleearth.connect.Channel;
+import com.mcmiddleearth.connect.bungee.ConnectBungeePlugin;
 import com.mcmiddleearth.connect.bungee.Handler.ChatMessageHandler;
 import com.mcmiddleearth.connect.bungee.Handler.RestartHandler;
 import com.mcmiddleearth.connect.bungee.Handler.TitleHandler;
@@ -98,7 +99,7 @@ public class PluginMessageListener implements Listener {
 
                     String uuid = in.readUTF();
                     String worldName = in.readUTF();
-                    MyWarpDBConnector.addWorldUUID(uuid, worldName);
+                    ConnectBungeePlugin.getMyWarpConnector().addWorldUUID(uuid, worldName);
                     break;
                 }
                 case Channel.RESTART:
