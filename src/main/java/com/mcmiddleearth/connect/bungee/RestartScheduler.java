@@ -22,11 +22,9 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Logger;
 import lombok.Getter;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ProxyServer;
@@ -55,31 +53,30 @@ public class RestartScheduler {
     public RestartScheduler() {
         loadConfig();
         task = ProxyServer.getInstance().getScheduler().schedule(ConnectBungeePlugin.getInstance(), () -> {
-                LocalDateTime now = LocalDateTime.now();
-Logger.getGlobal().info("Check scheduled reboots: "+now.getDayOfWeek()+" "+now.format(DateTimeFormatter.ISO_LOCAL_TIME));
-                DayOfWeek day = now.getDayOfWeek();
-                if(!restartScheduled) {
-                    for(int i=0; i<restartDays.size();i++) {
-                        if(day.equals(restartDays.get(i))) {
-                            LocalDateTime restart = restartTimes.get(i).atDate(LocalDate.now());
-                            if(now.isBefore(restart.minusMinutes(9)) 
-                                    && now.isAfter(restart.minusMinutes(10))) {
-                                restartScheduled = true;
-                                ProxyServer.getInstance().broadcast(new ComponentBuilder(ChatColor.BOLD+"Server will restart in 10 minutes.")
-                                                                    .color(ChatColor.RED).create());
-                                runLater(() -> ProxyServer.getInstance().broadcast(new ComponentBuilder(ChatColor.BOLD+"Server will restart in 5 minutes.")
-                                                                    .color(ChatColor.RED).create()),300);
-                                runLater(() -> ProxyServer.getInstance().broadcast(new ComponentBuilder(ChatColor.BOLD+"Server will restart in 1 minutes.")
-                                                                    .color(ChatColor.RED).create()),540);
-                                runLater(() -> ProxyServer.getInstance().broadcast(new ComponentBuilder(ChatColor.BOLD+"Server is restarting ...")
-                                                                    .color(ChatColor.RED).create()),600);
-                                runLater(() -> RestartHandler.restartProxy(false),602);
-                            }
+            LocalDateTime now = LocalDateTime.now();
+            DayOfWeek day = now.getDayOfWeek();
+            if(!restartScheduled) {
+                for(int i=0; i<restartDays.size();i++) {
+                    if(day.equals(restartDays.get(i))) {
+                        LocalDateTime restart = restartTimes.get(i).atDate(LocalDate.now());
+                        if(now.isBefore(restart.minusMinutes(9)) 
+                                && now.isAfter(restart.minusMinutes(10))) {
+                            restartScheduled = true;
+                            ProxyServer.getInstance().broadcast(new ComponentBuilder(ChatColor.BOLD+"MCME network will restart in 10 minutes.")
+                                                                .color(ChatColor.RED).create());
+                            runLater(() -> ProxyServer.getInstance().broadcast(new ComponentBuilder(ChatColor.BOLD+"MCME network will restart in 5 minutes.")
+                                                                .color(ChatColor.RED).create()),300);
+                            runLater(() -> ProxyServer.getInstance().broadcast(new ComponentBuilder(ChatColor.BOLD+"MCME network will restart in 1 minutes.")
+                                                                .color(ChatColor.RED).create()),540);
+                            runLater(() -> ProxyServer.getInstance().broadcast(new ComponentBuilder(ChatColor.BOLD+"MCME network is restarting ...")
+                                                                .color(ChatColor.RED).create()),600);
+                            runLater(() -> RestartHandler.restartProxy(false),602);
                         }
                     }
                 }
-            }, 1, TimeUnit.MINUTES); 
-        loadConfig();
+            }
+        }, 1, 1, TimeUnit.MINUTES); 
+        //loadConfig();
     }
     
     public final void loadConfig() {
