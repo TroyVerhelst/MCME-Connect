@@ -79,16 +79,19 @@ public class ConnectBungeePlugin extends Plugin {
     @Getter
     private static boolean myWarpEnabled;
     
+    private RestartScheduler restartScheduler;
+    
     @Override
     public void onEnable() {
         instance = this;
-        RestartHandler.init();
-        if(config.getBoolean("serverWatchdog", true)) {
-            watcher = new ServerWatchdog();
-        }
         configFile = new File(getDataFolder(),"config.yml");
         saveDefaultConfig();
         loadConfig();
+        RestartHandler.init();
+        restartScheduler = new RestartScheduler();
+        if(config.getBoolean("serverWatchdog", true)) {
+            watcher = new ServerWatchdog();
+        }
         loadLegacyPlayers();
         VanishHandler.setPvSupport(config.getBoolean("premiumVanish", false));
         myWarpEnabled = (Boolean) getConfig().getSection("myWarp").get("enabled");
@@ -113,6 +116,7 @@ public class ConnectBungeePlugin extends Plugin {
     public void onDisable() {
         watcher.stopWatchdog();
         myWarpConnector.disconnect();
+        restartScheduler.cancel();
     }
     
     public static boolean isMvtpDisabled(String server) {

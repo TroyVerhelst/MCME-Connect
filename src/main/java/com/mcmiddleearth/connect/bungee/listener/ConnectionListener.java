@@ -25,17 +25,20 @@ import com.mcmiddleearth.connect.bungee.Handler.LegacyPlayerHandler;
 import com.mcmiddleearth.connect.bungee.Handler.RestorestatsHandler;
 import com.mcmiddleearth.connect.bungee.vanish.VanishHandler;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.PlayerDisconnectEvent;
 import net.md_5.bungee.api.event.PostLoginEvent;
 import net.md_5.bungee.api.event.ServerConnectEvent;
-import net.md_5.bungee.api.event.ServerDisconnectEvent;
+import net.md_5.bungee.api.event.ServerConnectedEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 
@@ -175,5 +178,25 @@ Logger.getGlobal().info("Connecting to: "+server.getName());
         return other;
     }
     
+    private Map<ProxiedPlayer, ServerConnectEvent.Reason> connectReasons = new HashMap<>();
+    
+    @EventHandler
+    public void onServerConnect(ServerConnectEvent event) {
+        connectReasons.put(event.getPlayer(),event.getReason());
+    }
+    
+    @EventHandler
+    public void onServerConnected(ServerConnectedEvent event) {
+        ProxyServer.getInstance().getScheduler().schedule(ConnectBungeePlugin.getInstance(), () -> {
+            ProxiedPlayer player = event.getPlayer();
+            ServerInfo dest = event.getServer().getInfo();
+            ByteArrayDataOutput out = ByteStreams.newDataOutput();
+            out.writeUTF(Channel.JOIN);
+            out.writeUTF(player.getName());
+            out.writeUTF(connectReasons.get(player).name());
+            connectReasons.remove(player);
+            dest.sendData(Channel.MAIN, out.toByteArray(),true);   
+        }, ConnectBungeePlugin.getConnectDelay(), TimeUnit.MILLISECONDS);
+    }
 
 }

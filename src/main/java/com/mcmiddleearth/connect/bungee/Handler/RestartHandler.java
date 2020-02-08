@@ -73,18 +73,7 @@ public class RestartHandler {
                     next = servers.get(0);
                     while(servers.remove(next));
                 } else {
-                    ProxyServer.getInstance().getScheduler().schedule(ConnectBungeePlugin.getInstance(), () -> {
-                        if(!shutdown && !restartFile.exists()) {
-                            try {
-                                restartFile.createNewFile();
-                            } catch (IOException ex) {
-                                Logger.getLogger(RestartHandler.class.getName()).log(Level.SEVERE, null, ex);
-                            }
-                            ProxyServer.getInstance().stop("MCME network is restarting.");
-                        } else {
-                            ProxyServer.getInstance().stop("MCME network is shutting down.");
-                        }
-                    }, 5, TimeUnit.SECONDS);
+                    restartProxy(shutdown);
                     return;
                 }
             }
@@ -113,5 +102,20 @@ Logger.getGlobal().info("other servers: "+others);
                 callback.done(true, null);
             }
         }
+    }
+    
+    public static void restartProxy(boolean shutdown) {
+        ProxyServer.getInstance().getScheduler().schedule(ConnectBungeePlugin.getInstance(), () -> {
+            if(!shutdown && !restartFile.exists()) {
+                try {
+                    restartFile.createNewFile();
+                } catch (IOException ex) {
+                    Logger.getLogger(RestartHandler.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                ProxyServer.getInstance().stop("MCME network is restarting.");
+            } else {
+                ProxyServer.getInstance().stop("MCME network is shutting down.");
+            }
+        }, 5, TimeUnit.SECONDS);
     }
 }

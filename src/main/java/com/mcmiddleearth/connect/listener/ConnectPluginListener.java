@@ -21,6 +21,7 @@ import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import com.mcmiddleearth.connect.Channel;
 import com.mcmiddleearth.connect.ConnectPlugin;
+import com.mcmiddleearth.connect.events.PlayerConnectEvent;
 import com.mcmiddleearth.connect.restart.RestartHandler;
 import com.onarandombox.MultiverseCore.MultiverseCore;
 import github.scarsz.discordsrv.DiscordSRV;
@@ -57,7 +58,7 @@ public class ConnectPluginListener implements PluginMessageListener {
         }
         ByteArrayDataInput in = ByteStreams.newDataInput(message);
         String subchannel = in.readUTF();
-//Logger.getGlobal().info("Pugin Message! "+player+" channel "+subchannel);
+Logger.getGlobal().info("Pugin Message! "+player+" channel "+subchannel);
         if (subchannel.equals(Channel.TPPOS)) {
             String playerData = in.readUTF();
             String worldData = in.readUTF();
@@ -181,6 +182,15 @@ public class ConnectPluginListener implements PluginMessageListener {
                         }
                     }
                 }.runTaskLater(ConnectPlugin.getInstance(), 60);
+            });
+        } else if(subchannel.equals(Channel.JOIN)) {
+            String playerName = in.readUTF();
+            Player arrivingPlayer = Bukkit.getPlayer(playerName);
+            if(arrivingPlayer==null) return;
+            String reason = in.readUTF();
+            runAfterArrival(playerName, p -> {
+                Bukkit.getServer().getPluginManager()
+                      .callEvent(new PlayerConnectEvent(arrivingPlayer,PlayerConnectEvent.ConnectReason.valueOf(reason)));
             });
         }
     }
