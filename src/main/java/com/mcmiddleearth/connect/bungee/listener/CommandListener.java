@@ -28,12 +28,14 @@ import com.mcmiddleearth.connect.bungee.vanish.VanishHandler;
 import com.mcmiddleearth.connect.bungee.warp.WarpHandler;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.logging.Logger;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.ChatEvent;
 import net.md_5.bungee.api.event.TabCompleteEvent;
+import net.md_5.bungee.api.event.TabCompleteResponseEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 
@@ -229,9 +231,21 @@ public class CommandListener implements Listener {
     }
     
     
+/*    @EventHandler
+    public void onTabCompleteResponse(TabCompleteResponseEvent event) {
+Logger.getGlobal().info("Response:");        
+event.getSuggestions().forEach(name->Logger.getGlobal().info(name));
+    }*/
+    
     @EventHandler
     public void onTabComplete(TabCompleteEvent event) {
-        String[] args = event.getCursor().split(" ");
+//Logger.getGlobal().info("TAB: "+event.getCursor());
+        String[] argtemp = event.getCursor().split(" ");
+        if(event.getCursor().charAt(event.getCursor().length()-1)==' ') {
+            argtemp = Arrays.copyOf(argtemp, argtemp.length+1);
+            argtemp[argtemp.length-1] = "";
+        }
+        String[] args = argtemp;
         if(args.length>0) {
             switch(args[0]) {
                 /*case "/call":
@@ -291,6 +305,8 @@ public class CommandListener implements Listener {
             Collection<ProxiedPlayer> players = ProxyServer.getInstance().getPlayers();
             players.forEach(player -> event.getSuggestions().add(player.getName()));
         }*/
+//Logger.getGlobal().info("Bungee:");        
+//event.getSuggestions().forEach(name->Logger.getGlobal().info(name));
     }
     
     private void suggestAllPlayers(TabCompleteEvent event, String start) {
