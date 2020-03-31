@@ -52,16 +52,18 @@ public class RestartScheduler {
     private static File restartScheduleFile = new File(ConnectPlugin.getInstance().getDataFolder(),"restartSchedule.yml");
 
     public RestartScheduler() {
-        loadConfig();
+        //loadConfig();
         task = new BukkitRunnable() {
 
             @Override
             public void run() {
+                loadConfig();
                 LocalDateTime now = LocalDateTime.now();
-Logger.getGlobal().info("Check scheduled reboots: "+now.getDayOfWeek()+" "+now.format(DateTimeFormatter.ISO_LOCAL_TIME));
+//Logger.getGlobal().info("Check scheduled reboots: "+now.getDayOfWeek()+" "+now.format(DateTimeFormatter.ISO_LOCAL_TIME));
                 DayOfWeek day = now.getDayOfWeek();
                 if(!restartScheduled) {
                     for(int i=0; i<restartDays.size();i++) {
+//Logger.getGlobal().info("Restart time: "+restartDays.get(i).toString()+" "+restartTimes.get(i).toString());
                         if(day.equals(restartDays.get(i))) {
                             LocalDateTime restart = restartTimes.get(i).atDate(LocalDate.now());
                             if(now.isBefore(restart.minusMinutes(9)) 

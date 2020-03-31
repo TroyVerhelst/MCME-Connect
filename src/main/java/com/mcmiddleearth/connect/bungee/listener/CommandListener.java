@@ -24,18 +24,17 @@ import com.mcmiddleearth.connect.bungee.Handler.MvtpHandler;
 import com.mcmiddleearth.connect.bungee.Handler.RestartHandler;
 import com.mcmiddleearth.connect.bungee.Handler.RestorestatsHandler;
 import com.mcmiddleearth.connect.bungee.Handler.ThemeHandler;
+import com.mcmiddleearth.connect.bungee.Handler.TpaHandler;
 import com.mcmiddleearth.connect.bungee.vanish.VanishHandler;
 import com.mcmiddleearth.connect.bungee.warp.WarpHandler;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.logging.Logger;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.ChatEvent;
 import net.md_5.bungee.api.event.TabCompleteEvent;
-import net.md_5.bungee.api.event.TabCompleteResponseEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 
@@ -106,6 +105,33 @@ public class CommandListener implements Listener {
                         }
                     }
                 }
+            } else if(message[0].equalsIgnoreCase("/tpa") && message.length>1) {
+//Logger.getGlobal().info("/tpa!");
+                if(player.hasPermission(Permission.TPA)) {
+                    ProxiedPlayer destination = getPlayer(message[1]);
+                    if(destination != null 
+                            && !destination.getServer().getInfo().getName()
+                                .equals(player.getServer().getInfo().getName())) {
+                        if(player.hasPermission(Permission.WORLD+"."+destination.getServer()
+                                                                       .getInfo().getName())
+                                && isMvtpAllowed(player)) {
+                            TpaHandler.sendRequest(player,destination.getServer().getInfo(),destination);
+                        } else {
+                            player.sendMessage(new ComponentBuilder("You don't have permission to enter "
+                                                                      +destination.getName()+"'s world.")
+                                                    .color(ChatColor.RED).create());
+                        }
+                        event.setCancelled(true);
+                    }
+                }
+            } else if((message[0].equalsIgnoreCase("/tpaccept") || message[0].equalsIgnoreCase("/tpyes"))
+                       && TpaHandler.hasPendingRequest(player)) {
+                TpaHandler.accept(player);
+                event.setCancelled(true);
+            } else if((message[0].equalsIgnoreCase("/tpdeny") || message[0].equalsIgnoreCase("/tpno"))
+                       && TpaHandler.hasPendingRequest(player)) {
+                TpaHandler.deny(player);
+                event.setCancelled(true);
             } else if(message[0].equalsIgnoreCase("/tphere") && message.length>1) {
 //Logger.getGlobal().info("/tphere!");
                 if(player.hasPermission(Permission.TPHERE)) {
@@ -273,11 +299,12 @@ event.getSuggestions().forEach(name->Logger.getGlobal().info(name));
                     }
                     break;
                 case "/tp":
+                case "/tpa":
                 case "/tphere":
                 case "/msg":
                 case "/tell":
                     if(args.length>1) {
-                        suggestAllPlayers(event,args[args.length-1]);
+                        suggestAllOtherPlayers(event,args[args.length-1]);
                     }
                     break;
                 case "/reboot":
@@ -297,7 +324,7 @@ event.getSuggestions().forEach(name->Logger.getGlobal().info(name));
                 default:
 //Logger.getGlobal().info("Default: "+args[0]+" "+args[0].startsWith("/"));
                     if(!args[0].startsWith("/")) {
-                        suggestAllPlayers(event,args[args.length-1]);
+                        suggestAllOtherPlayers(event,args[args.length-1]);
                     }
             }
         } 
@@ -309,11 +336,12 @@ event.getSuggestions().forEach(name->Logger.getGlobal().info(name));
 //event.getSuggestions().forEach(name->Logger.getGlobal().info(name));
     }
     
-    private void suggestAllPlayers(TabCompleteEvent event, String start) {
+    private void suggestAllOtherPlayers(TabCompleteEvent event, String start) {
+        ProxiedPlayer thisPlayer = event.getSender() instanceof ProxiedPlayer?(ProxiedPlayer) event.getSender():null;
         Collection<ProxiedPlayer> players = ProxyServer.getInstance().getPlayers();
-        players.stream().filter(player -> player.getName().toLowerCase()
-                                                .startsWith(start.toLowerCase())
-                                       && !VanishHandler.isVanished(player))
+        players.stream().filter(player -> ((thisPlayer==null || !player.getName().equalsIgnoreCase(thisPlayer.getName())) 
+                                       && player.getName().toLowerCase().startsWith(start.toLowerCase())
+                                       && !VanishHandler.isVanished(player)))
                         .forEach(player -> event.getSuggestions().add(player.getName()));
     }
     

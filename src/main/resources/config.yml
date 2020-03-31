@@ -46,10 +46,10 @@ database:
 #	    break
 #	fi
 # done
-scheduledRestarts:
+scheduledRestarts: []
 # - ALL 11:00:00
-  - TUESDAY 11:00:00
-  - WEDNESDAY 10:00:00
+#  - TUESDAY 11:00:00
+#  - WEDNESDAY 10:00:00
 
 # for synchronization of first joined date create in plugin data folder a 
 # symlink to playerdata folder of first join server.

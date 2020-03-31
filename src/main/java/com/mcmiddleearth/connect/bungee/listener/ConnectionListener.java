@@ -23,6 +23,7 @@ import com.mcmiddleearth.connect.Permission;
 import com.mcmiddleearth.connect.bungee.ConnectBungeePlugin;
 import com.mcmiddleearth.connect.bungee.Handler.LegacyPlayerHandler;
 import com.mcmiddleearth.connect.bungee.Handler.RestorestatsHandler;
+import com.mcmiddleearth.connect.bungee.Handler.TpaHandler;
 import com.mcmiddleearth.connect.bungee.vanish.VanishHandler;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -98,6 +99,7 @@ Logger.getGlobal().info("Connecting to: "+server.getName());
     @EventHandler
     public void onDisconnect(PlayerDisconnectEvent event) {
         ProxiedPlayer player = event.getPlayer();
+        TpaHandler.removeRequests(player);
         if(!VanishHandler.isPvSupport()) {
             sendLeaveMessage(player,false);
         } else {
