@@ -25,6 +25,7 @@ import com.mcmiddleearth.connect.bungee.Handler.RestartHandler;
 import com.mcmiddleearth.connect.bungee.Handler.RestorestatsHandler;
 import com.mcmiddleearth.connect.bungee.Handler.ThemeHandler;
 import com.mcmiddleearth.connect.bungee.Handler.TpaHandler;
+import com.mcmiddleearth.connect.bungee.Handler.TpahereHandler;
 import com.mcmiddleearth.connect.bungee.vanish.VanishHandler;
 import com.mcmiddleearth.connect.bungee.warp.WarpHandler;
 import java.util.Arrays;
@@ -115,7 +116,7 @@ public class CommandListener implements Listener {
                         if(player.hasPermission(Permission.WORLD+"."+destination.getServer()
                                                                        .getInfo().getName())
                                 && isMvtpAllowed(player)) {
-                            TpaHandler.sendRequest(player,destination.getServer().getInfo(),destination);
+                            TpaHandler.sendRequest(player,destination);
                         } else {
                             player.sendMessage(new ComponentBuilder("You don't have permission to enter "
                                                                       +destination.getName()+"'s world.")
@@ -124,14 +125,37 @@ public class CommandListener implements Listener {
                         event.setCancelled(true);
                     }
                 }
-            } else if((message[0].equalsIgnoreCase("/tpaccept") || message[0].equalsIgnoreCase("/tpyes"))
-                       && TpaHandler.hasPendingRequest(player)) {
-                TpaHandler.accept(player);
-                event.setCancelled(true);
-            } else if((message[0].equalsIgnoreCase("/tpdeny") || message[0].equalsIgnoreCase("/tpno"))
-                       && TpaHandler.hasPendingRequest(player)) {
-                TpaHandler.deny(player);
-                event.setCancelled(true);
+            } else if(message[0].equalsIgnoreCase("/tpahere") && message.length>1) {
+//Logger.getGlobal().info("/tpa!");
+                if(player.hasPermission(Permission.TPA)) {
+                    ProxiedPlayer destination = getPlayer(message[1]);
+                    if(destination != null 
+                            && !destination.getServer().getInfo().getName()
+                                .equals(player.getServer().getInfo().getName())) {
+                        if(destination.hasPermission(Permission.WORLD+"."+player.getServer()
+                                                                       .getInfo().getName())
+                                && isMvtpAllowed(player)) {
+                            TpahereHandler.sendRequest(player,destination);
+                        } else {
+                            player.sendMessage(new ComponentBuilder("You don't have permission to enter "
+                                                                      +destination.getName()+"'s world.")
+                                                    .color(ChatColor.RED).create());
+                        }
+                        event.setCancelled(true);
+                    }
+                }
+            } else if(message[0].equalsIgnoreCase("/tpacancel")) {
+                if(TpaHandler.cancel(player) || TpahereHandler.cancel(player)) {
+                    event.setCancelled(true);
+                }
+            } else if((message[0].equalsIgnoreCase("/tpaccept") || message[0].equalsIgnoreCase("/tpyes"))) {
+                if(TpaHandler.accept(player) || TpahereHandler.accept(player)) {
+                    event.setCancelled(true);
+                }
+            } else if((message[0].equalsIgnoreCase("/tpdeny") || message[0].equalsIgnoreCase("/tpno"))) {
+                if(TpaHandler.deny(player) || TpahereHandler.deny(player)) {
+                    event.setCancelled(true);
+                }
             } else if(message[0].equalsIgnoreCase("/tphere") && message.length>1) {
 //Logger.getGlobal().info("/tphere!");
                 if(player.hasPermission(Permission.TPHERE)) {
@@ -300,6 +324,7 @@ event.getSuggestions().forEach(name->Logger.getGlobal().info(name));
                     break;
                 case "/tp":
                 case "/tpa":
+                case "/tpahere":
                 case "/tphere":
                 case "/msg":
                 case "/tell":
