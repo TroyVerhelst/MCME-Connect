@@ -32,7 +32,7 @@ import net.md_5.bungee.api.scheduler.ScheduledTask;
  *
  * @author Eriol_Eandur
  */
-public class TpaHandler {
+public class TpahereHandler {
     
     private final static List<TpaRequest> requests = new ArrayList<>();
    
@@ -45,14 +45,14 @@ public class TpaHandler {
                 .color(ChatColor.RED).create());  
             return;
         }
-        removeRequestsForSender(sender);
+        //removeRequestsForSender(sender);
         requests.add(new TpaRequest(sender, target));
         sender.sendMessage(new ComponentBuilder("Teleport request sent to "
                 +ChatColor.RED+target.getName()+ChatColor.GOLD+".\n"
-                +"To cancel this request, type "+ChatColor.RED+"/tpacancel"+ChatColor.GOLD+".")
+                +"To cancel this request, type "+ChatColor.RED+"/tpcancel"+ChatColor.GOLD+".")
             .color(ChatColor.GOLD).create());  
         target.sendMessage(new ComponentBuilder(ChatColor.RED+sender.getName()
-                + ChatColor.GOLD+" has requested to teleport to you.\n"
+                + ChatColor.GOLD+" has requested that you teleport to him.\n"
                 +"To teleport, type "+ChatColor.RED+"/tpaccept"+ChatColor.GOLD+"\n"
                 +"To deny this request, type "+ChatColor.RED+"/tpdeny"+ChatColor.GOLD+"\n"
                 +"This request will timeout after "+ChatColor.RED+"120 seconds"+ChatColor.GOLD+".")
@@ -65,16 +65,17 @@ public class TpaHandler {
         }
         requests.stream().filter(request->request.getTarget().getName().equalsIgnoreCase(player.getName()))
                          .forEach(request-> {
-            if(!TpHandler.handle(request.getSender().getName(), 
-                                 request.getTarget().getServer().getInfo().getName(), 
-                                 request.getTarget().getName())) {
-                request.getSender().sendMessage(new ComponentBuilder("There was an error with your teleportation!")
+            if(!TpHandler.handle(request.getTarget().getName(), 
+                                 request.getSender().getServer().getInfo().getName(), 
+                                 request.getSender().getName())) {
+                request.getSender().sendMessage(new ComponentBuilder("There was an error with your teleportation request!")
                     .color(ChatColor.RED).create());  
             } else {
                 request.getTarget().sendMessage(new ComponentBuilder("Teleport request accepted.")
                     .color(ChatColor.GOLD).create());  
                 request.getSender().sendMessage(new ComponentBuilder(ChatColor.RED+""+request.getTarget().getName()
-                        +ChatColor.GOLD+" accepted your teleport request.")
+                        +ChatColor.GOLD+" accepted your teleport request.\n"
+                                                                    +"Teleporting...")
                         //+"Teleporting to "+ChatColor.RED+request.getTarget().getName()+ChatColor.GOLD+".")
                     .color(ChatColor.GOLD).create());  
             }
@@ -109,7 +110,7 @@ public class TpaHandler {
         removeRequestsForTarget(player);
         return true;
     }
-    
+        
     public static void removeRequestsForSender(ProxiedPlayer sender) {
         List<TpaRequest> removal = new ArrayList<>();
         requests.stream().filter(request->request.getSender().getName().equalsIgnoreCase(sender.getName()))

@@ -30,6 +30,7 @@ import com.mcmiddleearth.connect.bungee.warp.MyWarpDBConnector;
 import com.mcmiddleearth.connect.bungee.watchdog.ServerWatchdog;
 import com.mcmiddleearth.connect.bungee.Handler.RestartHandler;
 import com.mcmiddleearth.connect.bungee.Handler.TpaHandler;
+import com.mcmiddleearth.connect.bungee.Handler.TpahereHandler;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
@@ -83,6 +84,7 @@ public class ConnectBungeePlugin extends Plugin {
     
     private RestartScheduler restartScheduler;
     private ScheduledTask tpaCleanupScheduler;
+    private ScheduledTask tpahereCleanupScheduler;
     
     @Override
     public void onEnable() {
@@ -92,6 +94,7 @@ public class ConnectBungeePlugin extends Plugin {
         loadConfig();
         RestartHandler.init();
         tpaCleanupScheduler = TpaHandler.startCleanupScheduler();
+        tpahereCleanupScheduler = TpahereHandler.startCleanupScheduler();
         restartScheduler = new RestartScheduler();
         if(config.getBoolean("serverWatchdog", true)) {
             watcher = new ServerWatchdog();
@@ -122,6 +125,7 @@ public class ConnectBungeePlugin extends Plugin {
         myWarpConnector.disconnect();
         restartScheduler.cancel();
         tpaCleanupScheduler.cancel();
+        tpahereCleanupScheduler.cancel();
     }
     
     public static boolean isMvtpDisabled(String server) {
