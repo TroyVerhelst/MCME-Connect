@@ -49,7 +49,7 @@ public class TpahereHandler {
         requests.add(new TpaRequest(sender, target));
         sender.sendMessage(new ComponentBuilder("Teleport request sent to "
                 +ChatColor.RED+target.getName()+ChatColor.GOLD+".\n"
-                +"To cancel this request, type "+ChatColor.RED+"/tpcancel"+ChatColor.GOLD+".")
+                +"To cancel this request, type "+ChatColor.RED+"/tpacancel"+ChatColor.GOLD+".")
             .color(ChatColor.GOLD).create());  
         target.sendMessage(new ComponentBuilder(ChatColor.RED+sender.getName()
                 + ChatColor.GOLD+" has requested that you teleport to him.\n"
