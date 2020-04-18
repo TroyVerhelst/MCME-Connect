@@ -4,7 +4,7 @@ version: ${project.version}
 description: Connecting MCME servers in a BungeeCord
 load: POSTWORLD
 api-version: 1.15
-depend: [PremiumVanish, DiscordSRV]
+softdepend: [PremiumVanish, DiscordSRV]
 
 commands:
     reboot:
