@@ -86,14 +86,14 @@ Logger.getGlobal().info("Checking: "+server.getName());
         }
 Logger.getGlobal().info("Connecting to: "+server.getName());
         event.getPlayer().connect(server);*/
-        ProxyServer.getInstance().getScheduler().schedule(ConnectBungeePlugin.getInstance(), () -> {
+        //ProxyServer.getInstance().getScheduler().schedule(ConnectBungeePlugin.getInstance(), () -> {
             ProxiedPlayer player = event.getPlayer();
             if(!VanishHandler.isPvSupport()) {
                 sendJoinMessage(player,false);
             } else {
                 VanishHandler.join(player);
             }
-        }, 5, TimeUnit.SECONDS);
+        //}, 5, TimeUnit.SECONDS);
     }
     
     @EventHandler

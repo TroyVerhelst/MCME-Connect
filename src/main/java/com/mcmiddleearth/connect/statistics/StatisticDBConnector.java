@@ -364,19 +364,38 @@ public class StatisticDBConnector {
                             public void run() {
                                 try {
                                     do {
-                                        Material mat = Material.valueOf(matResult.getString("material"));
-                                        for(Statistic stat : Statistic.values()) {
-                                            if(stat.getType().equals(Statistic.Type.BLOCK)
-                                                    ||stat.getType().equals(Statistic.Type.ITEM)) {
-                                                int value = matResult.getInt(getName(stat));
-//Logger.getGlobal().info("Set Statistic: "+stat.name()+ " for material "+mat.name() + " to "+value);
-                                                if(value > 0) {
-                                                    try {
-                                                        player.setStatistic(stat, mat, value);
-                                                    } catch(IllegalArgumentException ex) {
-                                                        Logger.getLogger(StatisticDBConnector.class.getName()).log(Level.WARNING, null, ex);                                        
+                                        Material mat;
+                                        boolean save = false;
+                                        try {
+                                            mat = Material.valueOf(matResult.getString("material"));
+                                        } catch(IllegalArgumentException ex) {
+                                            try {
+                                                mat = mappingOf(matResult.getString("material"));
+                                                save = true;
+                                            } catch (IllegalArgumentException ex2) {
+                                                mat = null;
+                                            }
+                                        }
+                                        if(mat != null) {
+                                            for(Statistic stat : Statistic.values()) {
+                                                if(stat.getType().equals(Statistic.Type.BLOCK)
+                                                        ||stat.getType().equals(Statistic.Type.ITEM)) {
+                                                    int value = matResult.getInt(getName(stat));
+    //Logger.getGlobal().info("Set Statistic: "+stat.name()+ " for material "+mat.name() + " to "+value);
+                                                    if(value > 0) {
+                                                        try {
+                                                            player.setStatistic(stat, mat, value);
+                                                            if(save) {
+                                                                saveMaterialStatsSync(player, stat, mat, value);
+                                                            }
+                                                        } catch(IllegalArgumentException ex) {
+                                                            Logger.getLogger(StatisticDBConnector.class.getName()).log(Level.WARNING, null, ex);                                        
+                                                        }
                                                     }
                                                 }
+                                            }
+                                            if(save) {
+                                                deleteMatStat(id, matResult.getString("material"));
                                             }
                                         }
                                     } while(matResult.next());
@@ -541,6 +560,13 @@ public class StatisticDBConnector {
         dbConnection.createStatement().execute(statement);
     }
     
+    private synchronized void deleteMatStat(int id, String mat) throws SQLException {
+        String statement = "DELETE FROM mcmeconnect_statistic_material "
+                +"WHERE id = "+id+" AND material = '"+ mat + "'";
+//Logger.getGlobal().info("insertMatStat "+statement);
+        dbConnection.createStatement().execute(statement);
+    }
+    
     private synchronized void saveEntityStatsSync(Player player, Statistic stat,
                                       EntityType entity, int value) {
         try {
@@ -595,7 +621,24 @@ public class StatisticDBConnector {
         }
     }
     
-    public String getName(Statistic stat) {
+    public String getName(Statistic stat) throws IllegalArgumentException{
         return (stat.name().equals("DROP")?"DROP_":stat.name());
+    }
+    
+    private Material mappingOf(String name) {
+        String[] split = name.split("_");
+        String result = "";
+        if(   split[split.length-1].equals("BLOCK")
+           || split[split.length-1].equals("ITEM")) {
+            for(int i = 0; i<split.length-1; i++) {
+                if(!result.equals("")) {
+                    result = result+"_";
+                }
+                result = result + split[i];
+            }
+Logger.getGlobal().info("Mapping: "+result);            
+            return Material.valueOf(result);
+        }
+        return null;
     }
 }
