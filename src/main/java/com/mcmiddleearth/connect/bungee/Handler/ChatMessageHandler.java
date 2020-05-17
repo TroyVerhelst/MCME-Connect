@@ -18,12 +18,13 @@ package com.mcmiddleearth.connect.bungee.Handler;
 
 import com.mcmiddleearth.connect.Channel;
 import com.mcmiddleearth.connect.bungee.ConnectBungeePlugin;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.concurrent.TimeUnit;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
+
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.concurrent.TimeUnit;
 
 /**
  *

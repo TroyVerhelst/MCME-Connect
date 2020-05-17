@@ -20,11 +20,11 @@ import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import com.mcmiddleearth.connect.Channel;
 import com.mcmiddleearth.connect.ConnectPlugin;
+import org.bukkit.Location;
+import org.bukkit.entity.Player;
+
 import java.util.UUID;
 import java.util.logging.Logger;
-import lombok.NonNull;
-import org.bukkit.entity.Player;
-import org.bukkit.Location;
 
 /**
  *
@@ -32,25 +32,28 @@ import org.bukkit.Location;
  */
 public class ConnectUtil {
     
-    public static void teleportPlayer(@NonNull Player player, 
-                                      @NonNull String server, 
-                                      @NonNull String world,
-                                      @NonNull Location location) {
+    public static void teleportPlayer(Player player, String server, String world, Location location) {
+        if (player == null) throw new NullPointerException("player can't be null");
+        if (server == null) throw new NullPointerException("server can't be null");
+        if (world == null) throw new NullPointerException("world can't be null");
+        if (location == null) throw new NullPointerException("location can't be null");
+
         ByteArrayDataOutput out = ByteStreams.newDataOutput();
         out.writeUTF(Channel.TPPOS);
         out.writeUTF(server);
         out.writeUTF(player.getName());
         out.writeUTF(world);
         out.writeUTF(location.getX()+";"+location.getY()+";"+location.getZ()+";"+location.getYaw()+";"+location.getPitch());
-Logger.getGlobal().info("teleport player "+player.getName()+" to server: "+server);
+        Logger.getGlobal().info("teleport player "+player.getName()+" to server: "+server);
         player.sendPluginMessage(ConnectPlugin.getInstance(), Channel.MAIN, out.toByteArray());
     }
     
-    public static void sendMessage(@NonNull Player sender,
-                                   @NonNull String server, 
-                                   @NonNull String recipient,
-                                   @NonNull String message,
-                                   int delay) {
+    public static void sendMessage(Player sender, String server, String recipient, String message, int delay) {
+        if (sender == null) throw new NullPointerException("sender can't be null");
+        if (server == null) throw new NullPointerException("server can't be null");
+        if (recipient == null) throw new NullPointerException("recipient can't be null");
+        if (message == null) throw new NullPointerException("message can't be null");
+
         ByteArrayDataOutput out = ByteStreams.newDataOutput();
         out.writeUTF(Channel.MESSAGE);
         out.writeUTF(server);
@@ -76,7 +79,7 @@ Logger.getGlobal().info("teleport player "+player.getName()+" to server: "+serve
     }
 
     public static void sendWorldUUID(Player sender, UUID uid, String name) {
-Logger.getGlobal().info("Sending world uuid: "+uid.toString()+" "+name);
+        Logger.getGlobal().info("Sending world uuid: "+uid.toString()+" "+name);
         ByteArrayDataOutput out = ByteStreams.newDataOutput();
         out.writeUTF(Channel.WORLD_UUID);
         out.writeUTF(uid.toString());
