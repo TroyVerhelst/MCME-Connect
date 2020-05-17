@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.mcmiddleearth</groupId>
   <artifactId>MCME-Connect</artifactId>
-  <version>1.1.5</version>
+  <version>1.2-SNAPSHOT</version>
   <build>
     <resources>
       <resource>
@@ -85,9 +85,27 @@
     </dependency>
     <dependency>
       <groupId>org.spigotmc</groupId>
-      <artifactId>spigot</artifactId>
-      <version>1.14.4-R0.1-SNAPSHOT</version>
+      <artifactId>spigot-API</artifactId>
+      <version>1.15.2-R0.1-SNAPSHOT</version>
       <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <artifactId>commons-lang</artifactId>
+          <groupId>commons-lang</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>guava</artifactId>
+          <groupId>com.google.guava</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>gson</artifactId>
+          <groupId>com.google.code.gson</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>bungeecord-chat</artifactId>
+          <groupId>net.md-5</groupId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.projectlombok</groupId>
@@ -98,15 +116,11 @@
     <dependency>
       <groupId>net.md-5</groupId>
       <artifactId>bungeecord-api</artifactId>
-      <version>1.13-SNAPSHOT</version>
+      <version>1.15-SNAPSHOT</version>
       <scope>provided</scope>
       <exclusions>
         <exclusion>
           <artifactId>brigadier</artifactId>
-          <groupId>net.md-5</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>bungeecord-chat</artifactId>
           <groupId>net.md-5</groupId>
         </exclusion>
         <exclusion>
@@ -119,6 +133,14 @@
         </exclusion>
         <exclusion>
           <artifactId>bungeecord-protocol</artifactId>
+          <groupId>net.md-5</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>netty-transport-native-unix-common</artifactId>
+          <groupId>io.netty</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>bungeecord-chat</artifactId>
           <groupId>net.md-5</groupId>
         </exclusion>
         <exclusion>
@@ -130,14 +152,10 @@
     <dependency>
       <groupId>net.md-5</groupId>
       <artifactId>bungeecord-api</artifactId>
-      <version>1.13-SNAPSHOT</version>
+      <version>1.15-SNAPSHOT</version>
       <type>javadoc</type>
       <scope>provided</scope>
       <exclusions>
-        <exclusion>
-          <artifactId>bungeecord-chat</artifactId>
-          <groupId>net.md-5</groupId>
-        </exclusion>
         <exclusion>
           <artifactId>bungeecord-config</artifactId>
           <groupId>net.md-5</groupId>
@@ -148,6 +166,14 @@
         </exclusion>
         <exclusion>
           <artifactId>bungeecord-protocol</artifactId>
+          <groupId>net.md-5</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>netty-transport-native-unix-common</artifactId>
+          <groupId>io.netty</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>bungeecord-chat</artifactId>
           <groupId>net.md-5</groupId>
         </exclusion>
         <exclusion>
@@ -165,13 +191,103 @@
     <dependency>
       <groupId>com.discordsrv</groupId>
       <artifactId>discordsrv</artifactId>
-      <version>1.16.6</version>
+      <version>1.18.4</version>
       <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <artifactId>JDA</artifactId>
+          <groupId>net.dv8tion</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>nv-websocket-client</artifactId>
+          <groupId>com.neovisionaries</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>slf4j-jdk14</artifactId>
+          <groupId>org.slf4j</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>unirest-java</artifactId>
+          <groupId>com.mashape.unirest</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>http-request</artifactId>
+          <groupId>com.github.kevinsawicki</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>commons-io</artifactId>
+          <groupId>commons-io</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>commons-collections</artifactId>
+          <groupId>commons-collections</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>commons-lang3</artifactId>
+          <groupId>org.apache.commons</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>configuralize</artifactId>
+          <groupId>github.scarsz</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>mysql-connector-java</artifactId>
+          <groupId>mysql</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>trove4j</artifactId>
+          <groupId>net.sf.trove4j</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>json-simple</artifactId>
+          <groupId>com.googlecode.json-simple</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>emoji-java</artifactId>
+          <groupId>com.vdurmont</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>java-semver</artifactId>
+          <groupId>com.github.zafarkhaja</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>minidns-hla</artifactId>
+          <groupId>org.minidns</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>MCDiscordReserializer</artifactId>
+          <groupId>me.vankka</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>SimpleAST</artifactId>
+          <groupId>me.vankka</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>text-api</artifactId>
+          <groupId>net.kyori</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>text-serializer-legacy</artifactId>
+          <groupId>net.kyori</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>text-adapter-bukkit</artifactId>
+          <groupId>net.kyori</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>gson</artifactId>
+          <groupId>com.google.code.gson</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>guava</artifactId>
+          <groupId>com.google.guava</groupId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>de.myzelyam</groupId>
       <artifactId>PremiumVanishAPI</artifactId>
-      <version>2.0.2</version>
+      <version>2.5.11</version>
       <scope>system</scope>
       <systemPath>D:\SystemRepository\PremiumVanishAPI.jar</systemPath>
     </dependency>
