@@ -17,12 +17,12 @@
 package com.mcmiddleearth.connect.bungee.warp;
 
 import com.mcmiddleearth.connect.bungee.ConnectBungeePlugin;
-import net.md_5.bungee.api.ProxyServer;
-import net.md_5.bungee.api.connection.ProxiedPlayer;
-import net.md_5.bungee.api.scheduler.ScheduledTask;
-import org.mariadb.jdbc.MySQLDataSource;
-
-import java.io.*;
+import com.mcmiddleearth.connect.statistics.StatisticDBConnector;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -33,8 +33,14 @@ import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import lombok.Getter;
+import net.md_5.bungee.api.ProxyServer;
+import net.md_5.bungee.api.connection.ProxiedPlayer;
+import net.md_5.bungee.api.scheduler.ScheduledTask;
+import org.mariadb.jdbc.MySQLDataSource;
 
 /**
  *
@@ -58,6 +64,7 @@ public class MyWarpDBConnector {
         
     private Map<String, String> worldUUID = new HashMap<>();
     
+    @Getter
     private boolean connected = false;
     
     private ExecutorService executor = Executors.newSingleThreadExecutor();
@@ -221,10 +228,6 @@ public class MyWarpDBConnector {
         } catch (IOException ex) {
             Logger.getLogger(MyWarpDBConnector.class.getName()).log(Level.SEVERE, null, ex);
         }
-    }
-
-    public boolean isConnected() {
-        return connected;
     }
 }
 /*

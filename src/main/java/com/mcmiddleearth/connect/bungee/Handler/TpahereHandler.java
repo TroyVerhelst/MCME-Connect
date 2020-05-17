@@ -17,15 +17,16 @@
 package com.mcmiddleearth.connect.bungee.Handler;
 
 import com.mcmiddleearth.connect.bungee.ConnectBungeePlugin;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
+import lombok.Getter;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.scheduler.ScheduledTask;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 /**
  *
@@ -153,7 +154,9 @@ public class TpahereHandler {
     
     public static class TpaRequest {
         
+        @Getter
         private ProxiedPlayer sender, target;
+        @Getter
         private long timestamp;
        
         
@@ -161,18 +164,6 @@ public class TpahereHandler {
             this.sender = sender;
             this.target = target;
             timestamp = System.currentTimeMillis();
-        }
-
-        public ProxiedPlayer getSender() {
-            return sender;
-        }
-
-        public ProxiedPlayer getTarget() {
-            return target;
-        }
-
-        public long getTimestamp() {
-            return timestamp;
         }
     }
 }

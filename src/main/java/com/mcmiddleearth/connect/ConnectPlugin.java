@@ -23,6 +23,7 @@ import com.mcmiddleearth.connect.restart.RestartCommand;
 import com.mcmiddleearth.connect.restart.RestartScheduler;
 import com.mcmiddleearth.connect.statistics.StatisticDBConnector;
 import com.mcmiddleearth.connect.statistics.StatisticListener;
+import lombok.Getter;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitTask;
@@ -33,14 +34,18 @@ import org.bukkit.scheduler.BukkitTask;
  */
 public class ConnectPlugin extends JavaPlugin {
     
+    @Getter
     private static JavaPlugin instance;
     
+    @Getter
     private static StatisticDBConnector statisticStorage;
     
+    @Getter
     private static String discordChannel;
     
     private BukkitTask statisticUpdater;
     
+    @Getter
     private static RestartScheduler restartScheduler;
     
     @Override
@@ -80,19 +85,4 @@ public class ConnectPlugin extends JavaPlugin {
             //statisticStorage.disconnect();
     }
 
-    public static JavaPlugin getInstance() {
-        return instance;
-    }
-
-    public static StatisticDBConnector getStatisticStorage() {
-        return statisticStorage;
-    }
-
-    public static String getDiscordChannel() {
-        return discordChannel;
-    }
-
-    public static RestartScheduler getRestartScheduler() {
-        return restartScheduler;
-    }
 }

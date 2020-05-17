@@ -16,6 +16,7 @@
  */
 package com.mcmiddleearth.connect.events;
 
+import lombok.Getter;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
@@ -28,8 +29,10 @@ public class PlayerConnectEvent extends Event {
     
     private static final HandlerList handlers = new HandlerList();
 
+    @Getter
     Player player;
     
+    @Getter
     ConnectReason reason;
     
     public PlayerConnectEvent(Player player, ConnectReason reason) {
@@ -55,13 +58,5 @@ public class PlayerConnectEvent extends Event {
         PLUGIN_MESSAGE,
         SERVER_DOWN_REDIRECT,
         UNKNOWN
-    }
-
-    public Player getPlayer() {
-        return player;
-    }
-
-    public ConnectReason getReason() {
-        return reason;
     }
 }

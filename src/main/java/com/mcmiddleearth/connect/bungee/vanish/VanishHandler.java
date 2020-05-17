@@ -19,18 +19,23 @@ package com.mcmiddleearth.connect.bungee.vanish;
 import com.mcmiddleearth.connect.Permission;
 import com.mcmiddleearth.connect.bungee.ConnectBungeePlugin;
 import com.mcmiddleearth.connect.bungee.listener.ConnectionListener;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.ProxyServer;
-import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.connection.ProxiedPlayer;
-
-import java.io.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.HashSet;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import lombok.Getter;
+import lombok.Setter;
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.ProxyServer;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.connection.ProxiedPlayer;
 
 /**
  *
@@ -38,6 +43,8 @@ import java.util.logging.Logger;
  */
 public class VanishHandler {
     
+    @Getter
+    @Setter
     private static boolean pvSupport;
     
     private static Set<UUID> vanishedPlayers = new HashSet<>();
@@ -73,6 +80,7 @@ public class VanishHandler {
     }
     
     public static void vanish(ProxiedPlayer player) {
+//Logger.getGlobal().info("Vanish!");
         vanishedPlayers.add(player.getUniqueId());
         saveVanished();
         ProxyServer.getInstance().getPlayers().stream()
@@ -95,10 +103,12 @@ public class VanishHandler {
     }
     
     public static boolean isVanished(ProxiedPlayer player) {
+//Logger.getGlobal().info("Vanished: "+player.getName()+" "+pvSupport+" "+vanishedPlayers.contains(player.getUniqueId()));
         return pvSupport && vanishedPlayers.contains(player.getUniqueId());
     }
     
     public static void saveVanished() {
+//Logger.getGlobal().info("saveVanished");
         if(!vanishFile.exists()) {
             try {
                 vanishFile.createNewFile();
@@ -124,13 +134,5 @@ public class VanishHandler {
         } catch (FileNotFoundException ex) {
             Logger.getLogger(VanishHandler.class.getName()).log(Level.WARNING, "No vanished player file found.");
         }
-    }
-
-    public static boolean isPvSupport() {
-        return pvSupport;
-    }
-
-    public static void setPvSupport(boolean pvSupport) {
-        VanishHandler.pvSupport = pvSupport;
     }
 }

@@ -16,55 +16,35 @@
  */
 package com.mcmiddleearth.connect.bungee.warp;
 
+import lombok.Getter;
+import lombok.Setter;
+
 /**
  *
  * @author Eriol_Eandur
  */
 public class Warp {
     
+    @Getter
+    @Setter
     private String server;
+    
+    @Getter
+    @Setter
     private String world;
+    
+    @Getter
+    @Setter
     private String name;
+    
+    @Getter
+    @Setter
     private String location;
+    
+    @Getter
+    @Setter
     private String welcomeMessage;
-
-    public String getServer() {
-        return server;
-    }
-
-    public void setServer(String server) {
-        this.server = server;
-    }
-
-    public String getWorld() {
-        return world;
-    }
-
-    public void setWorld(String world) {
-        this.world = world;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getLocation() {
-        return location;
-    }
-
-    public void setLocation(String location) {
-        this.location = location;
-    }
-
-    public String getWelcomeMessage() {
-        return welcomeMessage;
-    }
-
-    public void setWelcomeMessage(String welcomeMessage) {
-        this.welcomeMessage = welcomeMessage;
-    }
+    
+    
+    
 }
