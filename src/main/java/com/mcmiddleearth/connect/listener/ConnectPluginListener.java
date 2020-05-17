@@ -58,15 +58,16 @@ public class ConnectPluginListener implements PluginMessageListener {
         }
         ByteArrayDataInput in = ByteStreams.newDataInput(message);
         String subchannel = in.readUTF();
-Logger.getGlobal().info("Pugin Message! "+player+" channel "+subchannel);
+//Logger.getGlobal().info("Pugin Message! "+player+" channel "+subchannel);
         if (subchannel.equals(Channel.TPPOS)) {
             String playerData = in.readUTF();
             String worldData = in.readUTF();
             String[] locData = in.readUTF().split(";");
             runAfterArrival(playerData, source -> {
-//Logger.getGlobal().info("TPPOS! "+source);
+//Logger.getGlobal().info("TPPOS! "+source+" ");
                 source.sendMessage(ChatColor.GOLD+"Teleporting ...");
                 World world = Bukkit.getWorld(worldData);
+//Logger.getGlobal().info("TPPOS to "+worldData+" "+locData[0]+" "+locData[1]+" "+locData[2]);
                 if(world!=null) {
                     Location location = new Location(world,Double.parseDouble(locData[0]),
                                                          Double.parseDouble(locData[1]),
