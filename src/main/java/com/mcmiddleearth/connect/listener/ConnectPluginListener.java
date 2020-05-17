@@ -25,7 +25,7 @@ import com.mcmiddleearth.connect.events.PlayerConnectEvent;
 import com.mcmiddleearth.connect.restart.RestartHandler;
 import com.onarandombox.MultiverseCore.MultiverseCore;
 import github.scarsz.discordsrv.DiscordSRV;
-import github.scarsz.discordsrv.dependencies.jda.core.entities.TextChannel;
+import github.scarsz.discordsrv.dependencies.jda.api.entities.TextChannel;
 import github.scarsz.discordsrv.util.DiscordUtil;
 import java.util.Collection;
 import java.util.HashSet;
