@@ -20,11 +20,11 @@ import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import com.mcmiddleearth.connect.Channel;
 import com.mcmiddleearth.connect.ConnectPlugin;
+import org.bukkit.Location;
+import org.bukkit.entity.Player;
+
 import java.util.UUID;
 import java.util.logging.Logger;
-import lombok.NonNull;
-import org.bukkit.entity.Player;
-import org.bukkit.Location;
 
 /**
  *
@@ -32,10 +32,11 @@ import org.bukkit.Location;
  */
 public class ConnectUtil {
     
-    public static void teleportPlayer(@NonNull Player player, 
-                                      @NonNull String server, 
-                                      @NonNull String world,
-                                      @NonNull Location location) {
+    public static void teleportPlayer(Player player, String server, String world, Location location) {
+        if (player == null) throw new NullPointerException("player can't be null");
+        if (server == null) throw new NullPointerException("server can't be null");
+        if (world == null) throw new NullPointerException("world can't be null");
+        if (location == null) throw new NullPointerException("location can't be null");
         ByteArrayDataOutput out = ByteStreams.newDataOutput();
         out.writeUTF(Channel.TPPOS);
         out.writeUTF(server);
@@ -46,11 +47,12 @@ Logger.getGlobal().info("teleport player "+player.getName()+" to server: "+serve
         player.sendPluginMessage(ConnectPlugin.getInstance(), Channel.MAIN, out.toByteArray());
     }
     
-    public static void sendMessage(@NonNull Player sender,
-                                   @NonNull String server, 
-                                   @NonNull String recipient,
-                                   @NonNull String message,
+    public static void sendMessage(Player sender, String server, String recipient, String message,
                                    int delay) {
+        if (sender == null) throw new NullPointerException("sender can't be null");
+        if (server == null) throw new NullPointerException("server can't be null");
+        if (recipient == null) throw new NullPointerException("recipient can't be null");
+        if (message == null) throw new NullPointerException("message can't be null");
         ByteArrayDataOutput out = ByteStreams.newDataOutput();
         out.writeUTF(Channel.MESSAGE);
         out.writeUTF(server);
