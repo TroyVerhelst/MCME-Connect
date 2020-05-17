@@ -90,7 +90,7 @@ public class StatisticDBConnector {
             public void run() {
                 checkConnection();
             }
-        }.runTaskTimer(ConnectPlugin.getInstance(), 0, 1200);
+        }.runTaskTimerAsynchronously(ConnectPlugin.getInstance(), 0, 1200);
     }
 
     private void executeAsync(Consumer<Player> method, Player player) {
