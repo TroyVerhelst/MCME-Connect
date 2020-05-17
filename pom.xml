@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.mcmiddleearth</groupId>
     <artifactId>MCME-Connect</artifactId>
-    <version>1.2</version>
+    <version>1.2.1</version>
     <packaging>jar</packaging>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -35,15 +36,9 @@
                             <minimizeJar>false</minimizeJar>
                             <artifactSet>
                                 <includes>
-                                    <include> org.mariadb.jdbc:mariadb-java-client </include>
-                                    <include> com.github.mryurihi:tbnbt</include>
+                                    <include>org.mariadb.jdbc:mariadb-java-client</include>
+                                    <include>com.github.mryurihi:tbnbt</include>
                                 </includes>
-                                <!--<excludes>
-                                    <exclude>org.projectlombok:lombok</exclude>
-                                    <exclude>com.sk89q:worldedit</exclude>
-                                    <exclude>org.bukkit:bukkit</exclude>
-                                    <exclude>org.spigotmc:spigot-api</exclude>
-                                </excludes>-->
                             </artifactSet>
                         </configuration>
                     </execution>
@@ -51,15 +46,15 @@
             </plugin>
         </plugins>
         <resources>
-          <resource>
-            <filtering>true</filtering>
-            <directory>${basedir}/src/main/resources</directory>
-            <includes>
-                <include>plugin.yml</include>
-                <include>bungee.yml</include>
-                <include>config.yml</include>
-            </includes>
-          </resource>
+            <resource>
+                <filtering>true</filtering>
+                <directory>${basedir}/src/main/resources</directory>
+                <includes>
+                    <include>plugin.yml</include>
+                    <include>bungee.yml</include>
+                    <include>config.yml</include>
+                </includes>
+            </resource>
         </resources>
     </build>
     <repositories>
@@ -109,12 +104,6 @@
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-API</artifactId>
             <version>1.15.2-R0.1-SNAPSHOT</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>1.16.12</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

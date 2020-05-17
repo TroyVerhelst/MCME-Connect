@@ -17,6 +17,12 @@
 package com.mcmiddleearth.connect.bungee.Handler;
 
 import com.mcmiddleearth.connect.bungee.ConnectBungeePlugin;
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.ProxyServer;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.connection.ProxiedPlayer;
+import org.mariadb.jdbc.MySQLDataSource;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -32,12 +38,6 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import lombok.Getter;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.ProxyServer;
-import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.connection.ProxiedPlayer;
-import org.mariadb.jdbc.MySQLDataSource;
 
 /**
  *
@@ -45,7 +45,6 @@ import org.mariadb.jdbc.MySQLDataSource;
  */
 public class RestorestatsHandler {
 
-    @Getter
     private static Set<UUID> blacklist = new HashSet<>();
     
     //private static String bungeeBase = "/home/devserver/dev-bungee/";
@@ -154,5 +153,9 @@ public class RestorestatsHandler {
             Logger.getLogger(RestorestatsHandler.class.getName()).log(Level.SEVERE, null, ex);
         }
         
+    }
+
+    public static Set<UUID> getBlacklist() {
+        return blacklist;
     }
 }

@@ -20,66 +20,50 @@ package com.mcmiddleearth.connect.bungee;
  *
  * @author Eriol_Eandur
  */
+
 import com.mcmiddleearth.connect.Channel;
-import com.mcmiddleearth.connect.bungee.vanish.VanishHandler;
-import com.mcmiddleearth.connect.bungee.listener.PluginMessageListener;
-import com.mcmiddleearth.connect.bungee.listener.ConnectionListener;
-import com.mcmiddleearth.connect.bungee.listener.CommandListener;
-import com.mcmiddleearth.connect.bungee.vanish.VanishListener;
-import com.mcmiddleearth.connect.bungee.warp.MyWarpDBConnector;
-import com.mcmiddleearth.connect.bungee.watchdog.ServerWatchdog;
 import com.mcmiddleearth.connect.bungee.Handler.RestartHandler;
 import com.mcmiddleearth.connect.bungee.Handler.TpaHandler;
 import com.mcmiddleearth.connect.bungee.Handler.TpahereHandler;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import com.mcmiddleearth.connect.bungee.listener.CommandListener;
+import com.mcmiddleearth.connect.bungee.listener.ConnectionListener;
+import com.mcmiddleearth.connect.bungee.listener.PluginMessageListener;
+import com.mcmiddleearth.connect.bungee.vanish.VanishHandler;
+import com.mcmiddleearth.connect.bungee.vanish.VanishListener;
+import com.mcmiddleearth.connect.bungee.warp.MyWarpDBConnector;
+import com.mcmiddleearth.connect.bungee.watchdog.ServerWatchdog;
+import net.md_5.bungee.api.ProxyServer;
+import net.md_5.bungee.api.plugin.Plugin;
+import net.md_5.bungee.api.scheduler.ScheduledTask;
+
+import java.io.*;
 import java.util.HashSet;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import lombok.Getter;
-import net.md_5.bungee.api.ProxyServer;
-import net.md_5.bungee.api.plugin.Plugin;
-import net.md_5.bungee.api.scheduler.ScheduledTask;
 
 public class ConnectBungeePlugin extends Plugin {
     
-    @Getter
     private static ConnectBungeePlugin instance;
     
-    @Getter
     private static int connectDelay = 200;
-
-    @Getter
     private static Set<UUID> legacyPlayers = new HashSet<>();
-    
-    @Getter 
     private static boolean legacyRedirectEnabled = true;
-    @Getter 
     private static String legacyRedirectFrom = "newplayerworld";
-    @Getter 
     private static String legacyRedirectTo = "world";
     
-    @Getter
     private static ServerWatchdog watcher;
     
-    @Getter
     private static YamlConfiguration config = new YamlConfiguration();
             
     private static File configFile;
     
-    @Getter
     private static Set<String> noMVTP = new HashSet<>();
           
-    @Getter
     private static MyWarpDBConnector myWarpConnector;
     
-    @Getter
     private static boolean myWarpEnabled;
     
     private RestartScheduler restartScheduler;
@@ -221,5 +205,48 @@ public class ConnectBungeePlugin extends Plugin {
             } 
         }
     }
-    
+
+    public static ConnectBungeePlugin getInstance() {
+        return instance;
+    }
+
+    public static int getConnectDelay() {
+        return connectDelay;
+    }
+
+    public static Set<UUID> getLegacyPlayers() {
+        return legacyPlayers;
+    }
+
+    public static boolean isLegacyRedirectEnabled() {
+        return legacyRedirectEnabled;
+    }
+
+    public static String getLegacyRedirectFrom() {
+        return legacyRedirectFrom;
+    }
+
+    public static String getLegacyRedirectTo() {
+        return legacyRedirectTo;
+    }
+
+    public static ServerWatchdog getWatcher() {
+        return watcher;
+    }
+
+    public static YamlConfiguration getConfig() {
+        return config;
+    }
+
+    public static Set<String> getNoMVTP() {
+        return noMVTP;
+    }
+
+    public static MyWarpDBConnector getMyWarpConnector() {
+        return myWarpConnector;
+    }
+
+    public static boolean isMyWarpEnabled() {
+        return myWarpEnabled;
+    }
 }
