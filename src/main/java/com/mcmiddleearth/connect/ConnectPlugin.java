@@ -71,6 +71,7 @@ public class ConnectPlugin extends JavaPlugin {
                 ConnectPlugin.getStatisticStorage().saveStatisticSync(player);
             });
         }
+        ConnectPlugin.getStatisticStorage().disconnect();
         restartScheduler.cancel();
     }
 

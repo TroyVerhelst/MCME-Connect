@@ -98,6 +98,13 @@ public class StatisticDBConnector {
             @Override
             public void run() {
                 if (!connected) {
+                    if (dbConnection != null) {
+                        try {
+                            dbConnection.close();
+                        } catch (SQLException ex) {
+                            Logger.getLogger(StatisticDBConnector.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    }
                     connect();
                 }
                 method.accept(player);
