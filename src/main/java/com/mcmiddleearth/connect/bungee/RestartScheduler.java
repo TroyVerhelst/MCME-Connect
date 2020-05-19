@@ -17,6 +17,11 @@
 package com.mcmiddleearth.connect.bungee;
 
 import com.mcmiddleearth.connect.bungee.Handler.RestartHandler;
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.ProxyServer;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.scheduler.ScheduledTask;
+
 import java.io.File;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -25,11 +30,6 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import lombok.Getter;
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.ProxyServer;
-import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.scheduler.ScheduledTask;
 
 /**
  *
@@ -37,9 +37,7 @@ import net.md_5.bungee.api.scheduler.ScheduledTask;
  */
 public class RestartScheduler {
 
-    @Getter
     private final List<DayOfWeek> restartDays = new ArrayList<>();
-    @Getter
     private final List<LocalTime> restartTimes = new ArrayList<>();
     
     private final List<ScheduledTask> restartTasks = new ArrayList<>();
@@ -125,6 +123,13 @@ public class RestartScheduler {
             }
         }, delaySeconds, TimeUnit.SECONDS));
     }
-    
+
+    public List<DayOfWeek> getRestartDays() {
+        return restartDays;
+    }
+
+    public List<LocalTime> getRestartTimes() {
+        return restartTimes;
+    }
 }
 

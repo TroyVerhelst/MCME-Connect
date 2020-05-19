@@ -16,16 +16,15 @@
  */
 package com.mcmiddleearth.connect;
 
-import com.mcmiddleearth.connect.restart.RestartHandler;
-import com.mcmiddleearth.connect.listener.PlayerListener;
 import com.mcmiddleearth.connect.listener.ConnectPluginListener;
+import com.mcmiddleearth.connect.listener.PlayerListener;
 import com.mcmiddleearth.connect.restart.RestartCommand;
+import com.mcmiddleearth.connect.restart.RestartHandler;
 import com.mcmiddleearth.connect.restart.RestartScheduler;
 import com.mcmiddleearth.connect.statistics.StatisticDBConnector;
 import com.mcmiddleearth.connect.statistics.StatisticListener;
-import lombok.Getter;
-import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.Bukkit;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 
 /**
@@ -34,18 +33,14 @@ import org.bukkit.scheduler.BukkitTask;
  */
 public class ConnectPlugin extends JavaPlugin {
     
-    @Getter
     private static JavaPlugin instance;
     
-    @Getter
     private static StatisticDBConnector statisticStorage;
     
-    @Getter
     private static String discordChannel;
     
     private BukkitTask statisticUpdater;
     
-    @Getter
     private static RestartScheduler restartScheduler;
     
     @Override
@@ -67,9 +62,6 @@ public class ConnectPlugin extends JavaPlugin {
                 .registerIncomingPluginChannel(this, Channel.MAIN, new ConnectPluginListener());
         restartScheduler = new RestartScheduler();
         getCommand("reboot").setExecutor(new RestartCommand());
-        //Bukkit.getServer().getMessenger()
-        //        .registerIncomingPluginChannel(this, "BungeeCord", new BungeeCordListener());
-        //new StatisticsUpdater().runTaskTimer(this, 600, 600);
     }
     
     @Override
@@ -79,10 +71,23 @@ public class ConnectPlugin extends JavaPlugin {
                 ConnectPlugin.getStatisticStorage().saveStatisticSync(player);
             });
         }
+        ConnectPlugin.getStatisticStorage().disconnect();
         restartScheduler.cancel();
-        //statisticUpdater.cancel();
-        //if(statisticStorage != null) 
-            //statisticStorage.disconnect();
     }
 
+    public static JavaPlugin getInstance() {
+        return instance;
+    }
+
+    public static StatisticDBConnector getStatisticStorage() {
+        return statisticStorage;
+    }
+
+    public static String getDiscordChannel() {
+        return discordChannel;
+    }
+
+    public static RestartScheduler getRestartScheduler() {
+        return restartScheduler;
+    }
 }

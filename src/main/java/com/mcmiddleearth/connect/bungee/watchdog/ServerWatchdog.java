@@ -18,14 +18,14 @@ package com.mcmiddleearth.connect.bungee.watchdog;
 
 import com.mcmiddleearth.connect.Permission;
 import com.mcmiddleearth.connect.bungee.ConnectBungeePlugin;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-import lombok.Getter;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.scheduler.ScheduledTask;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  *
@@ -39,7 +39,6 @@ public class ServerWatchdog {
     
     List<String> downList = new ArrayList<>();
     
-    @Getter
     List<String> upList = new ArrayList<>();
     
     
@@ -91,5 +90,9 @@ public class ServerWatchdog {
     
     public void stopWatchdog() {
         watchdog.cancel();
+    }
+
+    public List<String> getUpList() {
+        return upList;
     }
 }
