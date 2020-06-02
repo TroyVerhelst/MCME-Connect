@@ -160,7 +160,7 @@ Logger.getGlobal().info("Connecting to: "+server.getName());
         });
         ProxiedPlayer other = getOtherPlayer(player); 
 //Logger.getGlobal().info("send Discord leave Message to: "+other);
-            if(other != null) {
+        if(other != null && other.getServer() != null) {
             ByteArrayDataOutput out = ByteStreams.newDataOutput();
             out.writeUTF(Channel.DISCORD);
             out.writeUTF(player.getName());
