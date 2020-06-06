@@ -29,12 +29,20 @@ import org.bukkit.scheduler.BukkitRunnable;
  * @author Eriol_Eandur
  */
 public class RestartHandler {
-    
+
     private static File restartFile = new File(ConnectPlugin.getInstance().getDataFolder(),"restart.nfo");
-    
+    private static File pluginRestartFile = new File(ConnectPlugin.getInstance().getDataFolder(),"connectPlugin.nfo");
+
     public static void init() {
-        if(restartFile.exists()) {
-            restartFile.delete();
+        if(!restartFile.exists()) {
+            try {
+                restartFile.createNewFile();
+            } catch (IOException ex) {
+                Logger.getLogger(RestartHandler.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        if(pluginRestartFile.exists()) {
+            pluginRestartFile.delete();
         }
     }
     
@@ -43,15 +51,35 @@ public class RestartHandler {
             if(!restartFile.exists()) {
                 restartFile.createNewFile();
             }
+            if (!pluginRestartFile.exists()) {
+                pluginRestartFile.createNewFile();
+            }
             new BukkitRunnable() {
                 @Override
                 public void run() {
-                    Bukkit.getOnlinePlayers().forEach(player->player.kickPlayer("Server is restarting."));
+                    Bukkit.getOnlinePlayers().forEach(player->player.kickPlayer("Server is restarting..."));
                     Bukkit.shutdown();
                 }
             }.runTaskLater(ConnectPlugin.getInstance(),60);
         } catch (IOException ex) {
             Logger.getLogger(RestartHandler.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+
+    public static void stopServer() {
+        if (restartFile.exists()) {
+            restartFile.delete();
+        }
+        new BukkitRunnable() {
+            @Override
+            public void run() {
+                Bukkit.getOnlinePlayers().forEach(player->player.kickPlayer("Server is shutting down..."));
+                Bukkit.shutdown();
+            }
+        }.runTaskLater(ConnectPlugin.getInstance(),60);
+    }
+
+    public static void testServerCrash() {
+        Bukkit.shutdown();
     }
 }

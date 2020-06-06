@@ -179,7 +179,7 @@ public class ConnectPluginListener implements PluginMessageListener {
                         if(!shutdown) {
                             RestartHandler.restartServer();
                         } else {
-                            Bukkit.shutdown();
+                            RestartHandler.stopServer();
                         }
                     }
                 }.runTaskLater(ConnectPlugin.getInstance(), 60);
