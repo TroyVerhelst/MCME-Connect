@@ -201,18 +201,27 @@ public class StatisticDBConnector {
             insertPlayerStats = dbConnection.prepareStatement(insertGeneral.toString());
             updatePlayerStats = dbConnection.prepareStatement(updateGeneral.toString());
             selectPlayerStats = dbConnection.prepareStatement(selectGeneral.toString());
+            insertPlayerStats.setQueryTimeout(10);
+            updatePlayerStats.setQueryTimeout(10);
+            selectPlayerStats.setQueryTimeout(10);
 
             //insertPlayerMatStats = dbConnection.prepareStatement(insertMat);
             //updatePlayerMatStats = dbConnection.prepareStatement(updateMat);
             selectPlayerMatStats = dbConnection.prepareStatement(selectMat.toString());
             selectPlayerAllMatStats = dbConnection.prepareStatement(selectAllMat.toString());
+            selectPlayerStats.setQueryTimeout(10);
+            selectPlayerStats.setQueryTimeout(10);
 
             selectPlayerEntityStats = dbConnection.prepareStatement(selectEntity.toString());
             selectPlayerAllEntityStats = dbConnection.prepareStatement(selectAllEntity.toString());
+            selectPlayerEntityStats.setQueryTimeout(10);
+            selectPlayerAllEntityStats.setQueryTimeout(10);
 
             selectPlayerId = dbConnection
                     .prepareStatement("SELECT id FROM mcmeconnect_statistic WHERE uuid = ?");
             selectPlayerId.setFetchSize(1);
+            selectPlayerId.setQueryTimeout(10);
+
             connected = true;
         } catch (SQLException ex) {
             Logger.getLogger(StatisticDBConnector.class.getName()).log(Level.SEVERE, null, ex);

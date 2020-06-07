@@ -19,6 +19,7 @@ package com.mcmiddleearth.connect;
 import com.mcmiddleearth.connect.listener.ConnectPluginListener;
 import com.mcmiddleearth.connect.listener.PlayerListener;
 import com.mcmiddleearth.connect.restart.RestartCommand;
+import com.mcmiddleearth.connect.restart.StopCommand;
 import com.mcmiddleearth.connect.restart.RestartHandler;
 import com.mcmiddleearth.connect.restart.RestartScheduler;
 import com.mcmiddleearth.connect.statistics.StatisticDBConnector;
@@ -61,7 +62,8 @@ public class ConnectPlugin extends JavaPlugin {
         Bukkit.getServer().getMessenger()
                 .registerIncomingPluginChannel(this, Channel.MAIN, new ConnectPluginListener());
         restartScheduler = new RestartScheduler();
-        getCommand("reboot").setExecutor(new RestartCommand());
+        getCommand("restart").setExecutor(new RestartCommand());
+        getCommand("stop").setExecutor(new StopCommand());
     }
     
     @Override

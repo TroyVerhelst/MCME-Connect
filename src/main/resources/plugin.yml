@@ -7,12 +7,14 @@ api-version: 1.15
 softdepend: [PremiumVanish, DiscordSRV]
 
 commands:
-    reboot:
+    restart:
         description: manages server restarts across the network
         usage: /restart <server>|proxy|all|reloadconfig|cancel
-#    shutdown:
-#        description: manages server shutdown across the network
-#        usage: /shutdown <server>|proxy|all
+        aliases: reboot
+    stop:
+        description: stops a server
+        usage: /stop [shutdown message]
+        aliases: shutdown
 permissions:
     mcmeconnect.tp:
         description: allows to tp to other players across the network
